@@ -4,8 +4,8 @@ from random import seed
 from random import random
 from random import randint
 
-turtle_speed = 50;
-turtles_numb = 5;
+turtle_speed = 45;
+turtles_numb = 10;
 dt = 1;
 
 screen_width = 500;
@@ -16,6 +16,7 @@ screen.colormode(255);
 
 def calc_angle(turtles, index_from, index_to):
     angle = turtles[index_from].towards(turtles[index_to]);
+    #print(index_from, index_to, angle);
     return angle;
 
 def set_directions(turtles, size):
@@ -45,25 +46,26 @@ for i in range(turtles_numb):
     turtles[i].pendown();
 
 
-#turning the first turtle at an arbitrary angle
+#turning each turtle towards the next
 set_directions(turtles, turtles_numb);
 
 
-
-"""i = 0;
-while (1):
+i = 0;
+while 1:
     #define angle from i towards i+1
-    turtles[i+1].forward(turtle_speed * dt);
-    angle = calc_angle(turtles, i);
-    turtles[i].setheading(angle);
-
     if(i == turtles_numb - 1):
-        i = -1;
-    i--;"""
+        angle = calc_angle(turtles, turtles_numb-1, 0);
+        turtles[i].setheading(angle);
+        turtles[i].forward(turtle_speed * dt);
+        i=0;
+    else:
+        angle = calc_angle(turtles, i, i+1);
+        turtles[i].setheading(angle);
+        turtles[i].forward(turtle_speed * dt);
+        i+=1;
 
-#for i in range(0, turtles_numb - 2):
-    #define angle from i towards i+1
- #   turtles[i+1].forward(turtle_speed * dt);
-  #  angle = calc_angle(turtles, i);
-   # turtles[i].setheading(angle);
+
+
+
+
 
