@@ -4,9 +4,10 @@ from random import seed
 from random import random
 from random import randint
 
-turtle_speed = 45;
+turtle_speed = 60;
 turtles_numb = 10;
-dt = 1;
+dt = 0.5;
+time_limit = 1000;
 
 screen_width = 500;
 screen_height = 500;
@@ -50,8 +51,9 @@ for i in range(turtles_numb):
 set_directions(turtles, turtles_numb);
 
 
+t = 0;
 i = 0;
-while 1:
+while t<time_limit:
     #define angle from i towards i+1
     if(i == turtles_numb - 1):
         angle = calc_angle(turtles, turtles_numb-1, 0);
@@ -63,8 +65,8 @@ while 1:
         turtles[i].setheading(angle);
         turtles[i].forward(turtle_speed * dt);
         i+=1;
-
-
+    t+=dt;
+    print(t);
 
 
 
