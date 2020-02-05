@@ -1,12 +1,15 @@
 import turtle
+import math
 import random as rand
 from random import seed
 from random import random
 from random import randint
 
-turtle_speed = 45;
-turtles_numb = 10;
-dt = 1;
+turtle_speed = 100;
+turtles_numb = 6;
+dt = 0.1;
+time_limit = 1000;
+radius = 150;
 
 screen_width = 500;
 screen_height = 500;
@@ -37,12 +40,16 @@ y_to = -y_from;
 x_from = -screen_width/2;
 x_to = -x_from;
 
+alpha = 360/turtles_numb;
+print("alpha=", alpha);
+
 for i in range(turtles_numb):
     x_rand = rand.randrange(x_from, x_to);
     y_rand = rand.randrange(y_from, y_to);
+    turtles[i].setheading(i*alpha);
     turtles[i].color((randint(0,255), randint(0,255), randint(0,255)));
     turtles[i].penup();
-    turtles[i].setpos(x_rand, y_rand);
+    turtles[i].forward(radius);
     turtles[i].pendown();
 
 
@@ -50,8 +57,9 @@ for i in range(turtles_numb):
 set_directions(turtles, turtles_numb);
 
 
+t = 0;
 i = 0;
-while 1:
+while t<time_limit:
     #define angle from i towards i+1
     if(i == turtles_numb - 1):
         angle = calc_angle(turtles, turtles_numb-1, 0);
@@ -63,8 +71,8 @@ while 1:
         turtles[i].setheading(angle);
         turtles[i].forward(turtle_speed * dt);
         i+=1;
-
-
+    t+=dt;
+    print(t);
 
 
 
