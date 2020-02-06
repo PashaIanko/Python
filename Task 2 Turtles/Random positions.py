@@ -6,7 +6,7 @@ from random import randint
 
 turtle_speed = 60;
 turtles_numb = 10;
-dt = 0.5;
+dt = 0.3;
 time_limit = 1000;
 
 screen_width = 500;
