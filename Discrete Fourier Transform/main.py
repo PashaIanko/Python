@@ -67,8 +67,9 @@ def get_diff(list_a, list_b):
         return result
 
 
-def calc_and_plot(x, y):
-
+def calc_and_plot(x, y, title):
+    fig = plt.figure()
+        
     #library function calc
     fft_lib_res = np.fft.fft(y)
     fft_lib_res_real = extract_real(fft_lib_res)
@@ -85,7 +86,7 @@ def calc_and_plot(x, y):
 
     fig = plt.figure()
     subplot_sin = fig.add_subplot(1, 2, 1)
-    subplot_sin.set_title("sin(x) Fourier Image(Re)")
+    subplot_sin.set_title(title + " Fourier Image(Re)")
     subplot_sin.xaxis.set_ticks_position('bottom')
     subplot_sin.yaxis.set_ticks_position('left')
     
@@ -95,7 +96,7 @@ def calc_and_plot(x, y):
     subplot_sin.legend()
 
     subplot_sin = fig.add_subplot(1, 2, 2)
-    subplot_sin.set_title("sin(x) Fourier Image(Im)")
+    subplot_sin.set_title(title + " Fourier Image(Im)")
     subplot_sin.xaxis.set_ticks_position('bottom')
     subplot_sin.yaxis.set_ticks_position('left')
     
@@ -103,17 +104,21 @@ def calc_and_plot(x, y):
     subplot_sin.plot(x, fft_lib_res_im, 'r--', label = 'Lib dft, Im')
     subplot_sin.plot(x, diff_im, 'g', label = 'difference')
     subplot_sin.legend()
+
+    fig.show()
     
-    plt.show()
 
 
 x = np.linspace(-np.pi, np.pi, 100)
 y=np.sin(x)
-calc_and_plot(x, y)
+calc_and_plot(x, y, 'sin(x)')
 
-print("creatin")
+
 x = np.linspace(-np.pi, np.pi, 100)
 y=np.sin(2*x)
-calc_and_plot(x, y)
+calc_and_plot(x, y, 'sin(2x)')
 
+x = np.linspace(-2*np.pi, 2*np.pi, 100)
+y=np.sin(10*x)
+calc_and_plot(x, y, 'sin(10x)')
         
