@@ -7,7 +7,6 @@ import numpy as np
 
 def dft (data):
     data_size = len(data)
-    print("len data=", len(data))
     result = []
     if data_size:
         
@@ -26,7 +25,7 @@ def dft (data):
     
     return result
     
-            
+   
         
 
 def square(data):
@@ -40,18 +39,6 @@ def square(data):
     return result_data
 
 
-
-
-"""x = np.linspace(-np.pi, np.pi, 10)
-y=np.sin(x)
-
-res = np.fft.fft(y)
-
-
-my_res = dft(y)
-
-for i in range (0, len(res)):
-    print("your:", my_res[i], "np:", res[i])"""
 
 def extract_real(complex_data):
     data_size = len(complex_data)
@@ -69,42 +56,64 @@ def extract_im(complex_data):
         result.append(real_val)
     return result
 
+def get_diff(list_a, list_b):
+    result = []
+    len_a = len(list_a)
+    len_b = len(list_b)
+
+    if len_a == len_b :
+        for i in range (0, len_a):
+            result.append(list_a[i] - list_b[i])
+        return result
+
+
+def calc_and_plot(x, y):
+
+    #library function calc
+    fft_lib_res = np.fft.fft(y)
+    fft_lib_res_real = extract_real(fft_lib_res)
+    fft_lib_res_im = extract_im(fft_lib_res)
+
+    #my_calc
+    my_res = dft(y)
+    my_res_real = extract_real(my_res)
+    my_res_im = extract_im(my_res)
+
+    #difference between my and library
+    diff_re = get_diff(fft_lib_res_real, my_res_real)
+    diff_im = get_diff(fft_lib_res_im, my_res_im)
+
+    fig = plt.figure()
+    subplot_sin = fig.add_subplot(1, 2, 1)
+    subplot_sin.set_title("sin(x) Fourier Image(Re)")
+    subplot_sin.xaxis.set_ticks_position('bottom')
+    subplot_sin.yaxis.set_ticks_position('left')
+    
+    subplot_sin.plot(x, my_res_real, 'b', label = 'My dft, Re')
+    subplot_sin.plot(x, fft_lib_res_real, 'r--', label = 'Lib dft, Re')
+    subplot_sin.plot(x, diff_re, 'g', label = 'difference')
+    subplot_sin.legend()
+
+    subplot_sin = fig.add_subplot(1, 2, 2)
+    subplot_sin.set_title("sin(x) Fourier Image(Im)")
+    subplot_sin.xaxis.set_ticks_position('bottom')
+    subplot_sin.yaxis.set_ticks_position('left')
+    
+    subplot_sin.plot(x, my_res_im, 'b', label = 'My dft, Im')
+    subplot_sin.plot(x, fft_lib_res_im, 'r--', label = 'Lib dft, Im')
+    subplot_sin.plot(x, diff_im, 'g', label = 'difference')
+    subplot_sin.legend()
+    
+    plt.show()
+
+
 x = np.linspace(-np.pi, np.pi, 100)
 y=np.sin(x)
+calc_and_plot(x, y)
 
-fft_lib_res = np.fft.fft(y)
-fft_lib_res_real = extract_real(fft_lib_res)
+print("creatin")
+x = np.linspace(-np.pi, np.pi, 100)
+y=np.sin(2*x)
+calc_and_plot(x, y)
 
-my_res = dft(y)
-my_res_real = extract_real(my_res)
-
-
-#fig = plt.figure()
-#subplot_sin = fig.add_subplot(4, 4, 1)
-#subplot_sin.set_title("sin(x)")
-#subplot_sin.xaxis.set_ticks_position('bottom')
-#subplot_sin.yaxis.set_ticks_position('left')
-
-plt.subplot(441)
-plt.plot(x, my_res_real, 'b')
-plt.plot(x, fft_lib_res_real, 'r--')
-
-plt.subplot(442)
-plt.plot(x, y, 'r')
-
-
-#plt.plot(x, y, 'b')
-plt.show()
-
-
-#data = [1, 2, 3, 4, 5]
-#res = square(data)
-"""print(res)
-
-res = dft(data)
-print(res)
-
-plt.plot(res)
-plt.ylabel("result")
-plt.show()"""
         
