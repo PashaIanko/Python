@@ -3,10 +3,11 @@ import random
 from tkinter import *
 
 win_height = 600
-win_width = 600
+win_width = 800
 gravity = 0.5
 
 rocket_velocity = -20
+rockets_numb = 5
 
 particles_numb = 20
 circle_particles_numb = 20
@@ -25,6 +26,12 @@ win.pack()
 
 def rgb2hex (r, g, b):
     return '#%02x%02x%02x'%(r, g, b)
+
+def randomColor():
+    r = math.floor(random.randrange(50, 255))
+    g = math.floor(random.randrange(50, 255))#math.floor(random.random() * 255)
+    b = math.floor(random.randrange(50, 255))#math.floor(random.random() * 255)
+    return rgb2hex(r, g, b)
 
 class Particle:
     def __init__(self, x, y, z):
@@ -64,53 +71,58 @@ class Particle:
         
 
 class Rocket:
-    def __init__(self, x, y, z):
+    def __init__(self, x, y, z, color):
+       # print("rocket ctor, x=", x)
         self.x = x
         self.y = y
         self.z = z
         self.vx = 0
         self.vy = rocket_velocity
         self.vz = 0
-        self.explodeTime = 10
         self.ready_explode = False
-        
+        self.color = color
 
     def update(self):
         self.x += self.vx * dt
         self.y += self.vy * dt
         self.z += self.vz * dt
-
-        
-
         self.vy += gravity * dt
-        self.explodeTime -= 1/60
-
+      #  print("update x=", self.x)
                
 
         if self.vy >= 0:
             self.ready_explode = True
-
-            
+           
             
     def draw(self):
         win.create_rectangle(self.x-2, self.y-4, self.x+2, self.y+5,
-                             fill="black")
+                             fill=self.color)
         
 particles = []
 circle_particles = []
 Rockets = []
 
 def spawnRocket(event):
-    Rockets.append(Rocket(win_width/2, win_height, 0))
+    print("spawning one rocket")
+    Rockets.append(Rocket(win_width/2, win_height, 0, "black"))
+
+def spawnRandomRockets(event):
+    for i in range (0, rockets_numb):
+        x_rand = random.randrange(100, win_width-15)
+       # print("x_rand=", x_rand)
+        y = win_height
+        Rockets.append(Rocket(x_rand, y, 0, randomColor()))
 
 win.bind("<Button-1>", spawnRocket)
+win.bind("<Button-3>", spawnRandomRockets)
+
 
 def engine():
     win.delete("all")
-
+   # print("len(Rockets)=", len(Rockets))
     for i in range(0, len(Rockets)):
-        if i>=len(Rockets) - 1:
-            break
+        if i>len(Rockets) - 1:
+            continue #break
         
         f = Rockets[i]
         if f.ready_explode == True:
@@ -125,23 +137,17 @@ def engine():
         f.draw()
 
     for i in range(0, len(particles)):
-        if i>=len(particles) - 1:
-            break
-        
         p = particles[i]
         p.update()
         p.draw()
 
     for i in range(0, len(circle_particles)):
-        if i>=len(circle_particles) - 1:
-            break
-        
         p = circle_particles[i]
         p.update()
         p.draw_circle()
     
     master.after(20, engine)
-
+    
 engine()
 
 """from tkinter import Tk, Canvas, Frame, BOTH
