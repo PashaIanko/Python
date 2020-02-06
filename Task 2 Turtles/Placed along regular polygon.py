@@ -5,8 +5,8 @@ from random import seed
 from random import random
 from random import randint
 
-turtle_speed = 100;
-turtles_numb = 6;
+turtle_speed = 15;
+turtles_numb = 3; #6
 dt = 0.1;
 time_limit = 1000;
 radius = 150;
