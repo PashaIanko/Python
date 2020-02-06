@@ -4,10 +4,17 @@ from tkinter import *
 
 win_height = 600
 win_width = 600
-gravity = 0.9
-rocket_velocity = -16
-particles_numb = 50
+gravity = 0.5
+
+rocket_velocity = -20
+
+particles_numb = 20
+circle_particles_numb = 20
+
+particles_size = 5
+circle_particles_size = 4
 particles_velocity = 2
+
 dt = 1
 
 master = Tk()
@@ -15,11 +22,6 @@ master = Tk()
 win = Canvas(master, width=win_width, height=win_height)
 win.pack()
 
-def randomColor():
-    r = math.floor(random.random() * 255)
-    g = math.floor(random.random() * 255)
-    b = math.floor(random.random() * 255)
-    return rgb2hex(r, g, b)
 
 def rgb2hex (r, g, b):
     return '#%02x%02x%02x'%(r, g, b)
@@ -35,7 +37,7 @@ class Particle:
         self.vx = self.V * math.cos(velocity_angle)
         self.vy = self.V * math.sin(velocity_angle)
         self.vz = 0
-        self.color = randomColor()
+        self.color = rgb2hex(100, 100, 100)
         self.unupdatable = False
 
     def update(self):
@@ -52,9 +54,13 @@ class Particle:
                   
 
     def draw(self):
-        size = 2
+        size = particles_size
         win.create_rectangle(self.x-size, self.y-size, self.x+size, self.y+size,
                              fill=self.color)
+
+    def draw_circle(self):
+        radius = circle_particles_size
+        win.create_oval(self.x-radius, self.y-radius, self.x+radius, self.y+radius, fill = "yellow")
         
 
 class Rocket:
@@ -91,6 +97,7 @@ class Rocket:
                              fill="black")
         
 particles = []
+circle_particles = []
 Rockets = []
 
 def spawnRocket(event):
@@ -109,6 +116,9 @@ def engine():
         if f.ready_explode == True:
             for j in range (0, particles_numb):
                 particles.append(Particle(f.x, f.y, f.z))
+
+            for j in range (0, circle_particles_numb):
+                circle_particles.append(Particle(f.x, f.y, f.z))
             Rockets.pop(i)   
         
         f.update()
@@ -121,6 +131,14 @@ def engine():
         p = particles[i]
         p.update()
         p.draw()
+
+    for i in range(0, len(circle_particles)):
+        if i>=len(circle_particles) - 1:
+            break
+        
+        p = circle_particles[i]
+        p.update()
+        p.draw_circle()
     
     master.after(20, engine)
 
