@@ -4,8 +4,8 @@ from tkinter import *
 
 win_height = 600
 win_width = 600
-gravity = 0.2
-rocket_velocity = -8
+gravity = 0.9
+rocket_velocity = -16
 particles_numb = 50
 particles_velocity = 2
 dt = 1
