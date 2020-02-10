@@ -44,15 +44,17 @@ def calc(wires, X, Y, ny, nx):
     Ex_ort, Ey_ort = orthogonal_vect(Ex, Ey)
     return Ex, Ey, Ex_ort, Ey_ort, phi
 
-
-def plot(x, y, Ex, Ey, Ex_ort, Ey_ort):
+def plot(x, y, Ex, Ey, Ex_ort, Ey_ort, phi):
     #plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
     #colors
-    field_color = 2 * np.log(np.hypot(Ex, Ey))
-    potential_color = abs(np.log(phi))
+    max_phi = np.max(phi)
+    max_E = np.max(np.hypot(Ex, Ey))
+    field_color = np.hypot(Ex, Ey)/max_E + 50 
+    
+    potential_color = phi/max_phi + 50
 
     charge_colors = {True: 'Green', False: 'Black'}
     for wire in wires:
@@ -92,7 +94,7 @@ wires.append(Wire(1, 0, right_charge_density))
 [Ex, Ey, Ex_ort, Ey_ort, phi] = calc(wires, X, Y, ny, nx)
 
 #plotting two identical wires
-plot(x, y, Ex, Ey, Ex_ort, Ey_ort)
+plot(x, y, Ex, Ey, Ex_ort, Ey_ort, phi)
 
 
 ###################################
@@ -108,7 +110,7 @@ wires.append(Wire(0.3, 0, right_charge_density))
 [Ex, Ey, Ex_ort, Ey_ort, phi] = calc(wires, X, Y, ny, nx)
 
 #plotting two identical wires
-plot(x, y, Ex, Ey, Ex_ort, Ey_ort)
+plot(x, y, Ex, Ey, Ex_ort, Ey_ort, phi)
 
 
 
@@ -130,7 +132,7 @@ for i in range(0, wires_numb):
 [Ex, Ey, Ex_ort, Ey_ort, phi] = calc(wires, X, Y, ny, nx)
 
 #plotting two identical wires
-plot(x, y, Ex, Ey, Ex_ort, Ey_ort)
+plot(x, y, Ex, Ey, Ex_ort, Ey_ort, phi)
 
 
 
@@ -160,7 +162,7 @@ wires.append(Wire(0, wire_to_strip_dist, wire_charge_density))
 [Ex, Ey, Ex_ort, Ey_ort, phi] = calc(wires, X, Y, ny, nx)
 
 #plotting two identical wires
-plot(x, y, Ex, Ey, Ex_ort, Ey_ort)
+plot(x, y, Ex, Ey, Ex_ort, Ey_ort, phi)
 
 
 
@@ -187,7 +189,7 @@ for i in range(0, wires_numb):
 [Ex, Ey, Ex_ort, Ey_ort, phi] = calc(wires, X, Y, ny, nx)
 
 #plotting two identical wires
-plot(x, y, Ex, Ey, Ex_ort, Ey_ort)
+plot(x, y, Ex, Ey, Ex_ort, Ey_ort, phi)
 
         
         
