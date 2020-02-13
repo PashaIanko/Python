@@ -18,10 +18,29 @@ def sin(x):
         x[i]=math.sin(x[i])
     return x
 
-class Example(tk.Frame):
-    def __init__(self, *args, **kwargs):
+class Function :
+    N = 0 #sample points
+    W = 2 #omega
+    From = 0
+    Amplitude = 1
+    To = 2
+    x = []
+    y = []
+    
+    def __init__(self):#, N=0, W=2, From=0, To=10, func=np.sin):
+       # pass #default=5
+       self.func=np.sin
+
+class GUI(tk.Frame):
+
+    functions = []
+    
+    def __init__(self, functions_numb=1, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
 
+        #for i in range(0, functions_numb):
+         #   functions.append(Function())
+        
         self.N = 100 #number of sample points
         self.W = 100 #omega
         self.From = -10
@@ -102,7 +121,7 @@ class Example(tk.Frame):
     
 
 root = tk.Tk()
-Example(root).pack(side="top", fill="both", expand=True)
+GUI(root).pack(side="top", fill="both", expand=True)
 root.mainloop()
   
 '''def get_val_command(s1):
