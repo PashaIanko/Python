@@ -12,7 +12,7 @@ def func(t, y):
 def theory(x):
     return 1.5*np.exp(2*x)-x*x-x-0.5
 
-t_from = 0
+'''t_from = 0
 t_to = 1
 
 y_start = 1 #y(t_from)
@@ -35,7 +35,7 @@ fig = plt.figure()
 subplot = fig.add_subplot(111)
 subplot.plot(res_t, res_y)
 subplot.plot(x_theory, y_theory)
-fig.show()
+fig.show()'''
 
 
 
@@ -96,7 +96,7 @@ while x<x_to:
     x+=dx
     res_x.append(x)
     
-print(res_y)
+
 
 
 def theory(x):
@@ -104,6 +104,19 @@ def theory(x):
 
 
 x_theory = np.linspace(x_from, x_to, 10)
-y_theory_1 = 4*np.exp(-x) - np.exp(2*x)
-y_theory_2 = np.exp(-x)-np.exp(2*x)
+y_theory_1 = 4*np.exp(-x_theory) - np.exp(2*x_theory)
+y_theory_2 = np.exp(-x_theory)-np.exp(2*x_theory)
+
+#plotting
+fig = plt.figure()
+subplot = fig.add_subplot(111)
+
+subplot.plot(x_theory, y_theory_1, 'b--', label='y1(x)theory')
+subplot.plot(x_theory, y_theory_2, 'r--', label='y2(x)theory')
+subplot.plot(res_x, res_y[0], 'b', label = 'y1(x) Euler')
+subplot.plot(res_x, res_y[1], 'r', label = 'y2(x) Euler')
+subplot.plot(res_x, res_y[2], 'black', label = 'y3(x) Euler')
+subplot.plot(res_x, res_y[3], 'yellow', label = 'y4(x) Euler')
+subplot.legend()
+fig.show()
     
