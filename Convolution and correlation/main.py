@@ -28,21 +28,15 @@ class Example(tk.Frame):
         self.To = 10
         x = []
         y = []
-        #self.button = tk.Button(self, text="Press me!")
-        #self.text = tk.Text(self, width=40, height=6)
-        #self.vsb = tk.Scrollbar(self, command=self.text.yview)
-        #self.text.configure(yscrollcommand=self.vsb.set)
-
-        #self.button.pack(side="top")
-        #self.vsb.pack(side="right", fill="y")
-        #self.text.pack(side="bottom", fill="x")
+        
+         
 
         self.Nscale = tk.Scale(self, label='Sample points', orient=HORIZONTAL ,length=400,from_=0,to=1000, resolution=10)
         self.Nscale.bind("<ButtonRelease>", self.assign_N)
         self.Nscale.pack()
         self.Nscale.set(self.N)
 
-        self.Wscale = tk.Scale(self, label='Omega', orient=HORIZONTAL ,length=400,from_=0,to=100, resolution=2)
+        self.Wscale = tk.Scale(self, label='Omega 1', orient=HORIZONTAL ,length=400,from_=0,to=100, resolution=2)
         self.Wscale.bind("<ButtonRelease>", self.assign_W)
         self.Wscale.pack()
         self.Wscale.set(self.W)
@@ -57,22 +51,22 @@ class Example(tk.Frame):
         self.Toscale.pack()
         self.Toscale.set(self.To)
 
+        self.Check = tk.Checkbutton(self, text="sin", variable=5)
+        self.Check.pack()
+
         self.figure = plt.figure()
-        plt.ion()
+        #plt.ion()
         
         
         self.func = sin
-        
-        #self.button.bind("<ButtonPress>", self.on_press)
-        #self.button.bind("<ButtonRelease>", self.on_release)
+                 
 
     def update(self):
         
         self.figure.clf()
-        print("from", self.From, "to", self.To, "N", self.N)
         x = np.linspace(self.From, self.To, self.N)
                     
-        y = np.sin(self.W*x)
+        y = self.func(self.W*x)
         
         subplot = self.figure.add_subplot(111)
         subplot.set_xlim(self.From, self.To)
