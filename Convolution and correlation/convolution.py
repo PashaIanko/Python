@@ -13,6 +13,15 @@ import time
 
 from tkinter import*
 
+def meander(x):
+    len_ = len(x)
+    for i in range(0, len_):
+        if 1<=x[i]<=2:
+            x[i]= 1
+        else:
+            x[i] = 0
+    return x
+
 def sin(x):
     for i in range(0, len(x)):
         x[i]=math.sin(x[i])
@@ -28,17 +37,11 @@ class FuncParams:
         self.N = N
 
 class Function :
-    #N = 100 #sample points
-    #W = 1 #omega
-    #From = 0
-    #Amplitude = 1
-    #Shift = 0
-    #To = 2
     x = []
     y = []
     
     def __init__(self, FuncParams):
-       #self.func=func
+      
        self.From = FuncParams.From
        self.To = FuncParams.To
        self.W = FuncParams.Omega
@@ -56,20 +59,20 @@ class Function :
         
 
 
-def show_plot(Function_a, Function_b):
+def show_plot(Function_a, Function_b, convol_func, title):
     fig = plt.figure()
+    fig.suptitle(title)
     subplot = fig.add_subplot(1,2,1)
     subplot.set_xlim(min(Function_a.From, Function_b.From), max(Function_a.To, Function_b.To))
     subplot.plot(Function_a.x, Function_a.y, 'b-')
     subplot.plot(Function_b.x, Function_b.y, 'g-')
+
+    #subplot = fig.add_subplot(1, 2, 2)
+    subplot.plot(convol_func.x, convol_func.y, 'r-')
+
     fig.show()
     return fig
 
-'''sin_Func = Function((FuncParams(0, 2, 1, 2, 0, 100)))
-cos_Func = Function((FuncParams(-2, 2, 1, 4, 1, 150)))
-sin_Func.calc(np.sin)
-cos_Func.calc(np.cos)
-show_plot(sin_Func, cos_Func)'''
 
 
 def convolution(Function_a, Function_b):
@@ -88,33 +91,38 @@ def convolution(Function_a, Function_b):
                 s_n += a[m]*b[n-m]
             
         res.append(s_n)
-    res_func = Function((FuncParams(min(Function_a.From, Function_b.From),max(Function_a.To, Function_b.To),0,0,0,len(res))))
+    res_func = Function((FuncParams(max(Function_a.From, Function_b.From), Function_a.To,0,0,0,len(res))))
     res_func.reset_x()
     res_func.y = res
     return res_func
         
 
-def meander(x):
-    len_ = len(x)
-    for i in range(0, len_):
-        if -1<=x[i]<=1:
-            x[i]= 1
-        else:
-            x[i] = 0
-    return x
+
         
 
-meandr_Func_a = Function((FuncParams(-2, 2, 1, 2, 0, 10)))
-meandr_Func_b = Function((FuncParams(-2, 2, 1, 2, 0, 10)))
+meandr_Func_a = Function((FuncParams(0, 4, 1, 2, 0, 1000)))
+meandr_Func_b = Function((FuncParams(0, 4, 1, 2, 0, 1000)))
 meandr_Func_a.calc(meander)
 meandr_Func_b.calc(meander)
 res_func = convolution(meandr_Func_a, meandr_Func_b)
-fig = show_plot(meandr_Func_a, meandr_Func_b)
+fig = show_plot(meandr_Func_a, meandr_Func_b, res_func, 'steps')
 
-subplot = fig.add_subplot(1, 2, 2)
-subplot.plot(res_func.x, res_func.y, 'b-')
-fig.show()
 
+#sin
+sin_Func_a = Function((FuncParams(0, np.pi*2, 1, 2, 3, 50)))
+sin_Func_b = Function((FuncParams(0, np.pi*2, 1, 2, 0, 50)))
+sin_Func_a.calc(np.sin)
+sin_Func_b.calc(np.sin)
+res_func = convolution(sin_Func_a, sin_Func_b)
+fig = show_plot(sin_Func_a, sin_Func_b, res_func, 'sine')
+
+#shifted sin
+sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, 2, 3, 50)))
+sin_Func_b = Function((FuncParams(-np.pi*2, np.pi*2, 1, 2, 0, 50)))
+sin_Func_a.calc(np.sin)
+sin_Func_b.calc(np.sin)
+res_func = convolution(sin_Func_a, sin_Func_b)
+fig = show_plot(sin_Func_a, sin_Func_b, res_func, 'sine')
 
 
 
