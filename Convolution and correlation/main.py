@@ -19,7 +19,7 @@ def sin(x):
     return x
 
 class Function :
-    N = 0 #sample points
+    N = 100 #sample points
     W = 2 #omega
     From = 0
     Amplitude = 1
@@ -28,18 +28,22 @@ class Function :
     y = []
     
     def __init__(self):#, N=0, W=2, From=0, To=10, func=np.sin):
-       # pass #default=5
        self.func=np.sin
 
+
+
+functions_numb=4
 class GUI(tk.Frame):
 
     functions = []
+    check_buttons_func = []
+    check_buttons_states = []
     
-    def __init__(self, functions_numb=1, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
-
-        #for i in range(0, functions_numb):
-         #   functions.append(Function())
+        
+        for i in range(0, functions_numb):
+            self.functions.append(Function())
         
         self.N = 100 #number of sample points
         self.W = 100 #omega
@@ -48,8 +52,6 @@ class GUI(tk.Frame):
         x = []
         y = []
         
-         
-
         self.Nscale = tk.Scale(self, label='Sample points', orient=HORIZONTAL ,length=400,from_=0,to=1000, resolution=10)
         self.Nscale.bind("<ButtonRelease>", self.assign_N)
         self.Nscale.pack()
@@ -70,15 +72,37 @@ class GUI(tk.Frame):
         self.Toscale.pack()
         self.Toscale.set(self.To)
 
-        self.Check = tk.Checkbutton(self, text="sin", variable=5)
+        self.Check = tk.Checkbutton(self, text="sin")
         self.Check.pack()
 
         self.figure = plt.figure()
+
+        for i in range(0, functions_numb):
+            var = IntVar()
+            print(var)
+            self.check_buttons_func.append(tk.Checkbutton(self, text=str(i), variable=var, command=lambda: self.ChangeFunc(i)))#command = self.ChangeFunc))
+            self.check_buttons_func[i].pack()
+            self.check_buttons_states.append(var)
+            
         #plt.ion()
         
         
         self.func = sin
-                 
+
+
+    def disable_other_checkboxes(self):
+        v=5
+        #for button in self.check_buttons_func:
+            #button.config(state=DISABLED)
+        
+    def ChangeFunc(self, index):
+        print("checkbox caught", index)
+        print(type(index))
+        print(type(self))
+        #print(self_.event.var.get())
+        self.disable_other_checkboxes()
+        
+        
 
     def update(self):
         
@@ -124,33 +148,20 @@ root = tk.Tk()
 GUI(root).pack(side="top", fill="both", expand=True)
 root.mainloop()
   
-'''def get_val_command(s1):
-    print("Command Number",str(s1))
-  
-def get_val_bind(event):
-    s1 = scal.get()
-    print("Get Number",str(s1))
-  
-def get_val_motion(event):
-    s1 = scal.get()
-    print("Motion Number",str(s1))
-  
-root = Tk()'''
-  
-'''# 1 способ
-scal = Scale(root,orient=VERTICAL ,length=300,from_=0,to=100,tickinterval=10,resolution=10)
-scal.bind("<B1-Motion>",get_val_motion)
-scal.pack()'''
-  
-'''# 2 способ
-but1 = Button(text="Get through bind")
-but1.bind("<Button-1>",get_val_bind)
-but1.pack()
-  
-# 3 способ
-but2 = Button(text="Get through command", command=lambda:get_val_command(scal.get()))
-but2.pack()
-  
-root.mainloop()'''
+
+
+
+'''from tkinter import *      
+states = []
+def onPress(i):                        
+    states[i] = not states[i]          
+     
+root = Tk()
+for i in range(10):
+    chk = Checkbutton(root, text=str(i), command=(lambda i=i: onPress(i)) )
+    chk.pack(side=LEFT)
+    states.append(0)
+root.mainloop()
+print (states)'''
 
 
