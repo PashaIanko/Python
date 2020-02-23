@@ -64,8 +64,25 @@ def calc_and_plot(func_a, func_b, title):
     lib_corr_func.y = lib_corr_array
     lib_corr_func.reset_x()
     lib_corr_func.normalize(max(lib_corr_func.y))
+
+    # Расчёт через Фурье
+    y_conv = signal.fftconvolve(func_a.y, func_b.y)
+    Fourier_conv_func = Function(FuncParams(min(func_a.From, func_b.From), max(func_a.To, func_b.To), 0,0,0, len(y_conv)))
+    Fourier_conv_func.y = y_conv#y_fourier
+    Fourier_conv_func.reset_x()
+    Fourier_conv_func.normalize(max(y_conv))    
     
-    fig = show_plot(func_a, func_b, conv_func, corr_func, conv_func_reverse, corr_func_reverse, title, lib_conv_func, lib_corr_func)
+
+    #Расчёт корреляции через фурье
+    Func_a_reverse = func_a.reverse()
+    y_corr = signal.fftconvolve(Func_a_reverse.y, func_b.y)
+    Fourier_corr_func = Function(FuncParams(min(func_a.From, func_b.From), max(func_a.To, func_b.To), 0,0,0, len(y_corr)))
+    Fourier_corr_func.y = y_corr
+    Fourier_corr_func.reset_x()
+    Fourier_corr_func.normalize(max(y_corr)) 
+    
+    fig = show_plot(func_a, func_b, conv_func, corr_func, conv_func_reverse, corr_func_reverse, title, lib_conv_func, lib_corr_func, Fourier_conv_func, Fourier_corr_func)
+    
 
 
 class FuncParams:
@@ -144,7 +161,7 @@ def get_diff(my_res_y, lib_res_y):
         
     return diff
 
-def show_plot(Function_a, Function_b, convol_func, corr_func, conv_func_reverse, corr_func_reverse, title, lib_conv_func, lib_corr_func):
+def show_plot(Function_a, Function_b, convol_func, corr_func, conv_func_reverse, corr_func_reverse, title, lib_conv_func, lib_corr_func, Fourier_conv_func, Fourier_corr_func):
     fig = plt.figure()
     fig.suptitle(title)
     subplot = fig.add_subplot(1,2,1)
@@ -153,11 +170,12 @@ def show_plot(Function_a, Function_b, convol_func, corr_func, conv_func_reverse,
     subplot.plot(Function_a.x, Function_a.y, 'b', label='func A')
     subplot.plot(Function_b.x, Function_b.y, 'r--', label='func B')
 
-    subplot.plot(convol_func.x, convol_func.y, 'g-', label='Convolution')
-    subplot.plot(lib_conv_func.x, lib_conv_func.y, 'k--', label='Library Convolution')
+    subplot.plot(convol_func.x, convol_func.y, 'g-', linewidth=1.2, label='Convolution')
+    subplot.plot(lib_conv_func.x, lib_conv_func.y, 'k--',linewidth=1.4, label='Library Convolution')
 
     diff_y = get_diff(convol_func.y, lib_conv_func.y)
     subplot.plot(convol_func.x, diff_y, 'yellow', label='Diff with lib')
+    subplot.plot(Fourier_conv_func.x, Fourier_conv_func.y, 'm--', label='Fourier Conv')
     subplot.legend()
    
     
@@ -169,11 +187,13 @@ def show_plot(Function_a, Function_b, convol_func, corr_func, conv_func_reverse,
     subplot.plot(Function_b.x, Function_b.y, 'r--', label='func B')
     
     subplot.plot(corr_func.x, corr_func.y, 'g-', label='Correlation')
-    subplot.plot(lib_corr_func.x, lib_corr_func.y, 'k--', label='Library Correlation')
+    subplot.plot(lib_corr_func.x, lib_corr_func.y, 'k--', linewidth=1.4, label='Library Correlation')
 
-    print(len(corr_func.y), len(lib_corr_func.y))
+    
     diff_y = get_diff(corr_func.y, lib_corr_func.y)
     subplot.plot(corr_func.x, diff_y, 'yellow', label = 'Diff with lib')
+
+    subplot.plot(Fourier_corr_func.x, Fourier_corr_func.y, 'm--', label='Fourier Correlation')
     
     subplot.legend()
 
@@ -247,26 +267,26 @@ res_func.normalize(max(res_func.y))
 fig = show_plot(meandr_Func_a, meandr_Func_b, res_func, 'shifted meander')'''
 
 
-#sin identic
+'''#sin identic
 sin_Func_a = Function((FuncParams(0, np.pi*2, 1, 3, 0, 50)))
 sin_Func_b = Function((FuncParams(0, np.pi*2, 1, 3, 0, 50)))
 sin_Func_a.calc(np.sin)
 sin_Func_b.calc(np.sin)
-calc_and_plot(sin_Func_a, sin_Func_b, 'identic sin')
+calc_and_plot(sin_Func_a, sin_Func_b, 'identic sin')'''
 
-#shifted sin
+'''#shifted sin
 sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, 1, 1, 50)))
 sin_Func_b = Function((FuncParams(-np.pi*2, np.pi*2, 1, 1, 0, 50)))
 sin_Func_a.calc(np.sin)
 sin_Func_b.calc(np.sin)
-calc_and_plot(sin_Func_a, sin_Func_b, 'shifted sin')
+calc_and_plot(sin_Func_a, sin_Func_b, 'shifted sin')'''
 
-#sin counter phase
+'''#sin counter phase
 sin_Func_a = Function((FuncParams(-np.pi*4, np.pi*4, 1, 1, np.pi, 50)))
 sin_Func_b = Function((FuncParams(-np.pi*4, np.pi*4, 1, 1, 0, 50)))
 sin_Func_a.calc(np.sin)
 sin_Func_b.calc(np.sin)
-calc_and_plot(sin_Func_a, sin_Func_b, 'sin conter phase')
+calc_and_plot(sin_Func_a, sin_Func_b, 'sin conter phase')'''
 
 #sin high freq + low freq
 sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, 5, 1, 500)))
@@ -340,23 +360,4 @@ Double_freq_func_.y=np.concatenate([y,y_temp])
 
 calc_and_plot(Double_freq_func, Double_freq_func_, 'double freq')
 
-
-
-'''#Через Фурье
-sin_Func_a = Function((FuncParams(-2*np.pi, np.pi*2, 1, 3, 0, 50)))
-sin_Func_b = Function((FuncParams(-2*np.pi, np.pi*2, 1, 3, 0, 50)))
-sin_Func_a.calc(np.sin)
-sin_Func_b.calc(np.sin)
-
-
-[conv_func, corr_func] = calc_and_normalize(sin_Func_a, sin_Func_b)
-[conv_func_reverse, corr_func_reverse] = calc_and_normalize(sin_Func_b, sin_Func_a)
-
-y = fft(sin_Func_a.y)*np.conj(fft(sin_Func_b.y))
-y_ = np.fft.ifft(y)
-x = np.linspace(0,1, len(y_))
-fig = plt.figure()
-subplot = fig.add_subplot(111)
-subplot.plot(x, y_)
-fig.show()'''
 
