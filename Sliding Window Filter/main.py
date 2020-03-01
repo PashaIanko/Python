@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import scipy.fft as sp 
 from scipy.fft import fft, fftfreq, fftshift
 from math import pi as PI
 import math
@@ -6,6 +7,7 @@ import cmath
 import numpy as np
 from scipy import signal
 import random as rand
+from scipy.fftpack import fft, ifft
 
 
 
@@ -134,6 +136,13 @@ class Function :
 
         xf = fftfreq(self.N, spacing_period)
         return [fftshift(xf), fftshift(fft_lib_res)]
+
+    def IFFT(self):
+        ifft_y = sp.ifft(self.y)
+        #spacing_period = (self.From-self.To)/self.N
+
+        ifft_x = np.linspace(-1, 1, len(ifft_y))
+        return [ifft_x, ifft_y]
         
         
 def calc_module(c_res):
@@ -179,7 +188,7 @@ def calc_and_plot(Filter_Func, Sample_Func, title):
     
     fig.show()
 
-'''# Скользящее окно
+# Скользящее окно
 Window = Function(FuncParams(0, 3, 1, 1, 0, 100))
 Window.calc(step, 1, 2)
 
@@ -201,7 +210,7 @@ sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, Omega, 0, 500)))
 sin_Func_a.calc(np.sin)
 sin_Func_a.noize(noize_intensity, noize_level)
 
-calc_and_plot(Window, sin_Func_a, 'noizy sin, w='+str(Omega))'''
+calc_and_plot(Window, sin_Func_a, 'noizy sin, w='+str(Omega))
 
 
 def cut_filter(x_fft, y_fft, cut_percent):
@@ -220,7 +229,7 @@ def cut_filter(x_fft, y_fft, cut_percent):
     
     
 
-# Проверка на частотную характеристику ограниченного фильтра
+'''# Проверка на частотную характеристику ограниченного фильтра
 Filter_len_cut = 0.5 # процент, насколько усекаем множество значений импульсной характеристики (выбор длины фильтра)
 Freq_character = Function((FuncParams(from_=0, to=400, ampl=1, omega=1, shift=0, N=1000)))
 Freq_character.calc(meander, 0, 150)
@@ -252,29 +261,148 @@ subplot.plot(x, calc_module(res_y), color = 'green', marker = '.', label = 'Cut 
 subplot.plot(Freq_character.x, Freq_character.y, 'r--', label='Source Filter Charact')
 
 subplot.legend()
-fig.show()
-
-
-# Последний шаг - свертка сигнала c импульсной характеристикой
-Omega = 3
-sin_Func = Function((FuncParams(-np.pi*2, np.pi*2, 1, Omega, 0, 1000)))
-sin_Func.calc(np.sin)
-y = np.convolve(sin_Func.y, res_y)
-y = calc_module(y)
-x = np.linspace(-np.pi*2,np.pi*2, len(y))
-
-fig = plt.figure()
-subplot = fig.add_subplot(111)
-
-subplot.plot(sin_Func.x, sin_Func.y, label='Source Signal')
-subplot.plot(x, y, label='Filtered Signal', marker='.')
-subplot.legend()
-fig.show()
+fig.show()'''
 
 
 
 
+def plot(x, y, title):
+    fig = plt.figure()
+    fig.suptitle(title)
+    subplot = fig.add_subplot(111)
+    
+    subplot.plot(x, y, label='plot()')
+    subplot.legend()
+    fig.show()
+
+def normalize(y, val):
+    for i in range(0, len(y)):
+        y[i] = y[i]/val
+    return y
 
 
+def calc_and_plot_filter(f_cut, filt_len, N_filt_points, src_Func, freq, title):
+    # Через аналитическую функцию
+
+    filter_from = -filt_len/2
+    filter_to = filt_len/2
+    
+    x_filt = np.linspace(filter_from, filter_to, N_filt_points)
+
+    # Импульсная характеристика нормированная
+    h = 2*f_cut* np.sin(2*np.pi*f_cut*x_filt) / (2*np.pi*f_cut*x_filt) #np.sinc(2*f_cut * x_filt)
+    h = normalize(h, abs(max(abs(h))))
+
+
+    # Фильтрование
+    y_filtered = np.convolve(src_Func.y, h)
+    x_filtered_from = src_Func.From#min(src_Func.From, -filt_len/2)
+    x_filtered_to = src_Func.To#max(src_Func.To, filt_len/2)
+    x_filtered = np.linspace(x_filtered_from, x_filtered_to, len(y_filtered))
+    
+    fig = plt.figure()
+    fig.suptitle(title)
+    
+    subplot = fig.add_subplot(133)
+    subplot.plot(x_filt, h, label = 'Filter Impulse Characteristics')
+    subplot.legend()
+
+    subplot = fig.add_subplot(131)
+    #subplot.set_xlim(min(x_filtered_from, src_Func.From), max(x_filtered_to, src_Func.To))
+    subplot.plot(x_filtered, y_filtered, 'r--', label='Filtered Signal')
+    subplot.legend()
+
+    subplot = fig.add_subplot(132)
+    subplot.plot(src_Func.x, src_Func.y, label = 'Source Signal')
+    subplot.legend()
+
+    fig.show()
+
+    
+    
+    
+
+# Через аналитическую функцию
+f_cut = 3
+f=5
+
+filter_len = 10
+N_points_filter = 1000
+
+sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
+sin_Func.reset_x()
+
+
+sin_Func.y = np.sin(f * 2*np.pi * sin_Func.x) + np.sin(3*f * 2*np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=5 and 15, f cut = 10')
+
+
+#
+f_cut = 100
+f = 50
+filter_len = 50
+N_points_filter = 1000
+sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
+sin_Func.reset_x()
+
+sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(3*f * 2 * np.pi * sin_Func.x) +1*np.sin(9*f * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=50, 150, 950, f cut ='+str(f_cut))
+
+# Пример как выше, но частота среза больше
+f_cut = 300
+f = 50
+filter_len = 50
+N_points_filter = 1000
+sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
+sin_Func.reset_x()
+
+sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(3*f * 2 * np.pi * sin_Func.x) +1*np.sin(9*f * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=50, 150, 950, f cut ='+str(f_cut))
+
+
+
+# Пример обрезания частоты
+f_cut = 1
+f=2
+filter_len = 10
+N_points_filter = 200
+sin_Func = Function((FuncParams(-4/f, 4/f, 1, 1, 0, 1500)))
+sin_Func.reset_x()
+
+sin_Func.y = np.sin(20*f * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'f src=40, f cut=1')
+
+
+
+
+
+# Пример сначала с обной частотой, потом с другой
+N=500
+f_1 = 1
+f_2 = 3
+left_border = -2*np.pi
+right_border = 0
+x = np.linspace(left_border, right_border, N)
+y = np.sin(2*np.pi*f_1*x)
+
+x = np.linspace(0, 2*np.pi, N)
+y_temp = np.sin(2*np.pi*f_2*x)
+y_concat=np.concatenate([y,y_temp])
+
+
+Double_freq_func = Function((FuncParams(from_=-2*np.pi, to=2*np.pi, ampl=1, omega=1, shift=0, N=1000)))
+
+
+x = np.linspace(-2*np.pi, 2*np.pi, 2*N)
+Double_freq_func.x=x
+Double_freq_func.y=np.concatenate([y,y_temp])
+
+f_cut = 2
+f=2
+filter_len = 10
+N_points_filter = 200
+
+
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, Double_freq_func, f, 'Double freq, f src='+str(f_1)+' , ' + str(f_2))
 
     
