@@ -43,11 +43,11 @@ class Particle:
         self.z = z
         self.V = particles_velocity
         velocity_angle_phi = random.uniform(0, 2*3.14)
-        velocity_angle_theta = random.uniform(0, 3.14)
+        velocity_angle_theta = random.uniform(0, 2*3.14)
        
-        self.vx = self.V * math.cos(velocity_angle_phi)*math.cos(velocity_angle_theta)
+        self.vx = self.V * math.cos(velocity_angle_phi)*math.sin(velocity_angle_theta)
+        self.vz = self.V * math.sin(velocity_angle_phi)*math.sin(velocity_angle_theta) #self.V * math.cos(velocity_angle_theta)#
         self.vy = self.V * math.cos(velocity_angle_theta)#self.V * math.sin(velocity_angle_phi)*math.sin(velocity_angle_theta)
-        self.vz = self.V * math.sin(velocity_angle_phi)*math.sin(velocity_angle_theta)#self.V * math.cos(velocity_angle_theta)
         self.color = rgb2hex(100, 100, 100)
         self.unupdatable = False
 

@@ -182,7 +182,7 @@ wires_coords = np.linspace(strip_x_from, strip_x_to, wires_numb)
 
 for i in range(0, wires_numb):
     wires.append(Wire(wires_coords[i], -dist_between_strips/2, wire_charge_density))
-    wires.append(Wire(wires_coords[i], dist_between_strips/2, wire_charge_density))
+    wires.append(Wire(wires_coords[i], dist_between_strips/2, -wire_charge_density))
 
 
 #calc phi and field

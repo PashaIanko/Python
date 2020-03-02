@@ -108,7 +108,7 @@ class Function :
        self.Ampl = FuncParams.Ampl
 
     def reset_x(self):
-        self.x.clear()
+       # self.x.clear()
         self.x = np.linspace(self.From, self.To, self.N)
 
     def calc(self, func, *args, **func_args):
@@ -215,9 +215,22 @@ def show_plot(Function_a, Function_b, convol_func, corr_func, conv_func_reverse,
 def convolution(Function_a, Function_b):
     N = len(Function_a.y)#(Function_a.x)
     M = len(Function_b.y)#(Function_b.x)
+    '''if N<M:
+        for i in range(0,abs(M-N)):
+            Function_a.y = np.append(Function_a.y, 0)
+    elif M<N:
+        for i in range(0, abs(N-M)):
+            Function_b.y = np.append(Function_b.y, 0)'''
+    
+    '''N = len(Function_a.y)#(Function_a.x)
+    M = len(Function_b.y)
+    Function_a.N=N
+    Function_b.N = M'''
     n_lim = N+M-2
     a = Function_a.y
     b = Function_b.y
+    #Function_a.reset_x()
+    #Function_b.reset_x()
     res = []
     for n in range (0, n_lim):
         s_n = 0
@@ -288,7 +301,7 @@ sin_Func_a.calc(np.sin)
 sin_Func_b.calc(np.sin)
 calc_and_plot(sin_Func_a, sin_Func_b, 'sin conter phase')'''
 
-#sin high freq + low freq
+'''#sin high freq + low freq
 sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, 5, 1, 500)))
 sin_Func_b = Function((FuncParams(-np.pi*2, np.pi*2, 1, 1, 0, 500)))
 sin_Func_a.calc(np.sin)
@@ -358,6 +371,43 @@ Double_freq_func.y=np.concatenate([y,y_temp])
 Double_freq_func_.x =x
 Double_freq_func_.y=np.concatenate([y,y_temp])
 
-calc_and_plot(Double_freq_func, Double_freq_func_, 'double freq')
+calc_and_plot(Double_freq_func, Double_freq_func_, 'double freq')'''
+
+
+# Разное количество отсчётов
+sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, 3, 0, 300)))
+sin_Func_b = Function((FuncParams(-np.pi*2, np.pi*2, 1, 3, 0, 100)))
+sin_Func_a.calc(np.sin)
+sin_Func_b.calc(np.sin)
+sin_Func_a.noize(0.5, 1)
+sin_Func_b.noize(0.5, 1)
+calc_and_plot(sin_Func_a, sin_Func_b, 'noizy sin, N1=300, N2=100')
+
+# Разное количество отсчётов
+sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, 3, 0, 600)))
+sin_Func_b = Function((FuncParams(-np.pi*2, np.pi*2, 1, 3, 0, 200)))
+sin_Func_a.calc(np.sin)
+sin_Func_b.calc(np.sin)
+sin_Func_a.noize(0.5, 1)
+sin_Func_b.noize(0.5, 1)
+calc_and_plot(sin_Func_a, sin_Func_b, 'noizy sin, N1=600, N2=200')
+
+#sin identic
+N1=400
+N2=100
+sin_Func_a = Function((FuncParams(0, np.pi*2, 1, 3, 0, N1)))
+sin_Func_b = Function((FuncParams(0, np.pi*2, 1, 3, 0, N2)))
+sin_Func_a.calc(np.sin)
+sin_Func_b.calc(np.sin)
+calc_and_plot(sin_Func_a, sin_Func_b, 'identic sin' + 'N1='+str(N1) + ' N2= '+str(N2) )
+
+#sin identic
+N1=700
+N2=700
+sin_Func_a = Function((FuncParams(0, np.pi*2, 1, 3, 0, N1)))
+sin_Func_b = Function((FuncParams(0, np.pi*2, 1, 3, 0, N2)))
+sin_Func_a.calc(np.sin)
+sin_Func_b.calc(np.sin)
+calc_and_plot(sin_Func_a, sin_Func_b, 'identic sin' + 'N1='+str(N1) + ' N2= '+str(N2) )
 
 

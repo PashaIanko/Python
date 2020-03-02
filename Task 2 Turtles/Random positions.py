@@ -53,7 +53,7 @@ set_directions(turtles, turtles_numb);
 
 t = 0;
 i = 0;
-while t<time_limit:
+while True: #t<time_limit:
     #define angle from i towards i+1
     if(i == turtles_numb - 1):
         angle = calc_angle(turtles, turtles_numb-1, 0);

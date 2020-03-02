@@ -6,8 +6,8 @@ from random import random
 from random import randint
 
 turtle_speed = 45;
-turtles_numb = 8; #6
-dt = 10;
+turtles_numb = 6; #6
+dt = 0.1;
 time_limit = 1000;
 radius = 250;
 
@@ -56,18 +56,28 @@ for i in range(turtles_numb):
 #turning each turtle towards the next
 set_directions(turtles, turtles_numb);
 
+def get_dist(turtle, turtle_to):
+    return math.sqrt(((turtle.xcor() - turtle_to.xcor())**2 + (turtle.ycor() - turtle_to.ycor())**2))
 
 def all_close_to_meet(turtles, pos_x, pos_y, accuracy):
-    for turtle in turtles:
+    for i in range(0, len(turtles)-1):
+        dist = get_dist(turtles[i], turtles[i+1])
+        print("dist=", dist)
+        if dist >= accuracy:
+            return False
+    return True
+                        
+    """for turtle in turtles:
+        
         #print(turtle.xcor())
         if (abs(turtle.xcor() - pos_x) >= accuracy or abs(turtle.ycor() - pos_y) >= accuracy ):
             return False
-    return True    
+    return True    """
 
 
 t = 0;
 i = 0;
-accuracy = 1
+accuracy = 5
 while t<time_limit:
     #define angle from i towards i+1
     if(i == turtles_numb - 1):
