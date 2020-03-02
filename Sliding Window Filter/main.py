@@ -226,10 +226,23 @@ def cut_filter(x_fft, y_fft, cut_percent):
     res_x = x_fft.tolist()[middle_idx - max_index : middle_idx + max_index]
     return [res_x, res_y]
     
+
+def plot(x, y, title):
+    fig = plt.figure()
+    fig.suptitle(title)
+    subplot = fig.add_subplot(111)
     
+    subplot.plot(x, y, label='plot()')
+    subplot.legend()
+    fig.show()
+
+def normalize(y, val):
+    for i in range(0, len(y)):
+        y[i] = y[i]/val
+    return y    
     
 
-'''# Проверка на частотную характеристику ограниченного фильтра
+# Проверка на частотную характеристику ограниченного фильтра
 Filter_len_cut = 0.5 # процент, насколько усекаем множество значений импульсной характеристики (выбор длины фильтра)
 Freq_character = Function((FuncParams(from_=0, to=400, ampl=1, omega=1, shift=0, N=1000)))
 Freq_character.calc(meander, 0, 150)
@@ -251,34 +264,21 @@ subplot.legend()
 
 # После обратного Фурье от урезанной характеристики фильтра
 res_y = np.fft.ifft(cut_fft_y)
-#res_y = calc_module(res_y)
+
 
 x = np.linspace(Freq_character.From, Freq_character.To, len(res_y))
 
 
 subplot = fig.add_subplot(122)
 subplot.plot(x, calc_module(res_y), color = 'green', marker = '.', label = 'Cut Filter Charact')
-subplot.plot(Freq_character.x, Freq_character.y, 'r--', label='Source Filter Charact')
+#subplot.plot(Freq_character.x, Freq_character.y, 'r--', label='Source Filter Charact')
 
 subplot.legend()
-fig.show()'''
+fig.show()
 
 
 
 
-def plot(x, y, title):
-    fig = plt.figure()
-    fig.suptitle(title)
-    subplot = fig.add_subplot(111)
-    
-    subplot.plot(x, y, label='plot()')
-    subplot.legend()
-    fig.show()
-
-def normalize(y, val):
-    for i in range(0, len(y)):
-        y[i] = y[i]/val
-    return y
 
 
 def calc_and_plot_filter(f_cut, filt_len, N_filt_points, src_Func, freq, title):
@@ -323,19 +323,49 @@ def calc_and_plot_filter(f_cut, filt_len, N_filt_points, src_Func, freq, title):
     
 
 # Через аналитическую функцию
-f_cut = 3
-f=5
+f_cut = 0.1
+f=2
 
-filter_len = 10
+filter_len = 50
 N_points_filter = 1000
 
+sin_Func = Function((FuncParams(-15/f, 15/f, 1, 1, 0, 1500)))
+sin_Func.reset_x()
+
+f1 = 3*f
+f2 = 10*f
+sin_Func.y = np.sin(f1 * 2*np.pi * sin_Func.x) + np.sin(f2 * 2*np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src='+str(f1)+' and '+ str(f2)+ ', f cut='+str(f_cut))
+
+
+# Срезание частоты ещё пример
+f_cut = 1
+f=1
+filter_len = 50
+N_points_filter = 1000
+
+
+noize_level=0.3
+noize_intensity=0.20
+sin_Func = Function((FuncParams(-np.pi, np.pi, 1, 1, 0, 500)))
+sin_Func.reset_x()
+sin_Func.y = np.sin(f * sin_Func.x)
+sin_Func.noize(noize_intensity, noize_level)
+
+f1 = 6
+f2 = 20
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src='+str(f1)+' and '+ str(f2)+ ', f cut='+str(f_cut))
+
+# Пример как выше, но частота среза больше
+f_cut = 1000
+f = 50
+filter_len = 50
+N_points_filter = 1000
 sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
 
-
-sin_Func.y = np.sin(f * 2*np.pi * sin_Func.x) + np.sin(3*f * 2*np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=5 and 15, f cut = 10')
-
+sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(3*f * 2 * np.pi * sin_Func.x) +1*np.sin(9*f * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'noizy sin, f cut ='+str(f_cut))
 
 #
 f_cut = 100
@@ -397,12 +427,12 @@ x = np.linspace(-2*np.pi, 2*np.pi, 2*N)
 Double_freq_func.x=x
 Double_freq_func.y=np.concatenate([y,y_temp])
 
-f_cut = 2
+f_cut = 0.3 # А с f_cut = 1 почему-то не работает
 f=2
-filter_len = 10
-N_points_filter = 200
+filter_len = 50
+N_points_filter = 600
 
 
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, Double_freq_func, f, 'Double freq, f src='+str(f_1)+' , ' + str(f_2))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, Double_freq_func, f, 'Double freq, f src='+str(f_1)+' , ' + str(f_2)+'f_cut='+str(f_cut))
 
     
