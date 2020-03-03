@@ -349,12 +349,10 @@ noize_level=0.3
 noize_intensity=0.20
 sin_Func = Function((FuncParams(-np.pi, np.pi, 1, 1, 0, 500)))
 sin_Func.reset_x()
-sin_Func.y = np.sin(f * sin_Func.x)
+sin_Func.y = np.sin(2*np.pi*f * sin_Func.x)
 sin_Func.noize(noize_intensity, noize_level)
 
-f1 = 6
-f2 = 20
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src='+str(f1)+' and '+ str(f2)+ ', f cut='+str(f_cut))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'noizy sin, f= '+str(f)+' f cut='+str(f_cut))
 
 # Пример как выше, но частота среза больше
 f_cut = 1000
@@ -363,9 +361,11 @@ filter_len = 50
 N_points_filter = 1000
 sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
-
-sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(3*f * 2 * np.pi * sin_Func.x) +1*np.sin(9*f * 2 * np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'noizy sin, f cut ='+str(f_cut))
+f1=f
+f2=3*f
+f3=9*f
+sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(f2 * 2 * np.pi * sin_Func.x) +1*np.sin(f3 * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum,'+'f1= '+str(f1)+'f2= '+str(f2)+'f3='+str(f3) +'f cut ='+str(f_cut))
 
 #
 f_cut = 100
@@ -374,9 +374,11 @@ filter_len = 50
 N_points_filter = 1000
 sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
-
-sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(3*f * 2 * np.pi * sin_Func.x) +1*np.sin(9*f * 2 * np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=50, 150, 950, f cut ='+str(f_cut))
+f1=f
+f2=3*f
+f3=9*f
+sin_Func.y = np.sin(f1 * 2 * np.pi * sin_Func.x) + 1*np.sin(f2 * 2 * np.pi * sin_Func.x) +1*np.sin(f3 * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f1=' +str(f1)+'f2='+str(f2)+'f3='+str(f3)+ 'f cut ='+str(f_cut))
 
 # Пример как выше, но частота среза больше
 f_cut = 300
@@ -394,13 +396,14 @@ calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, 
 # Пример обрезания частоты
 f_cut = 1
 f=2
+f_src = 20*f
 filter_len = 10
 N_points_filter = 200
 sin_Func = Function((FuncParams(-4/f, 4/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
 
-sin_Func.y = np.sin(20*f * 2 * np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'f src=40, f cut=1')
+sin_Func.y = np.sin(f_src * 2 * np.pi * sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'f src= ' +str(f_src)+'f cut= '+str(f_cut))
 
 
 
@@ -434,5 +437,21 @@ N_points_filter = 600
 
 
 calc_and_plot_filter(f_cut, filter_len, N_points_filter, Double_freq_func, f, 'Double freq, f src='+str(f_1)+' , ' + str(f_2)+'f_cut='+str(f_cut))
+
+
+
+# Пример обрезки синуса
+f_cut = 0.15
+f1=50
+f2 = 3*f1
+
+filter_len = 10
+N_points_filter = 200
+sin_Func = Function((FuncParams(-3/f1, 3/f1, 1, 1, 0, 1500)))
+sin_Func.reset_x()
+
+sin_Func.y = np.sin(f1  * 2*np.pi* sin_Func.x)+np.sin(f2 * 2*np.pi* sin_Func.x)
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f1, 'sum sin, f1= '+str(f1)+' f2= '+str(f2)+'f_cut= '+str(f_cut))#+'f3='+str(f3))
+
 
     
