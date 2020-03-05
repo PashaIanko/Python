@@ -19,35 +19,7 @@ N_integral = 150
 def LenardJones(x):
     return 4*(x**(-12) - x**(-6))
 
-#def func(E)
-
-def calc_s(XIN, XOUT, E):
-    '''h = (XOUT-XIN)/N_integral
-    
-    func = lambda x: (abs(E-LenardJones(x)))**(1/2)
-    
-    integral = integrate.quad(func, XIN, XOUT)
-    
-    return integral[0]*gamma'''
-    # функция вида (sqrt(E-LenardJones(x)))
-    h = (XOUT-XIN)/N_integral
-    x = np.linspace(XIN, XOUT, int((XOUT-XIN)/h))
-    func = lambda x: (abs(E-LenardJones(x)))**(1/2)
-    y = func(x)
-    
-    i = 0
-    integral=0
-    while i<= len(x)-2:
-        y_0 = y[i+1]
-        y_prev = y[i]
-        y_next = y[i+1]
-        J1 = (h/3)*(y_next+y_prev+4*y_0)
-        integral+=J1
-        i+=3
-        
-    return integral*gamma
-    
-       
+   
 
 def calc_XIN_XOUT(E):
     dx = 0.1
@@ -71,71 +43,81 @@ def calc_XIN_XOUT(E):
     
     return [XIN, XOUT]
 
+def calc_k2(x, gamma, epsilon):
+    return (gamma**2) * (epsilon - LenardJones(x))
 
-def calc_Energy(N, E1, E2, DE, F1, s, XIN, XOUT):
+
+def calc_y_np1(y_nm1, y_n, dx, k2nm1, k2n, k2np1):
+    const1 = 1 / (1 + (dx**2) * k2np1 / 12)
+    const2 = 1 - (5 * (k2n) * (dx**2) / 12)
+    const3 = 1 + ((dx**2) * (k2nm1) / 12)
+
+    ynp1 = const1 * (2 * const2 * y_n - const3 * y_nm1)
+    return ynp1
+
+def Numerov_calc(y_init, x, dx, gamma, epsilon):
+    y_res = [y_init[0], y_init[1]]
     
-    #N - energy level
-    while abs(DE)>= TOLE:
-        E = E2
-       # print('E=', E)
-        [XIN_, XOUT_] = calc_XIN_XOUT(E)
-       # print('xin xout', XIN, XOUT)
-        s = calc_s(XIN_, XOUT_, E)
-       # print('s=', s)
-        F2 = s-(N+1/2)*np.pi
-        if F2 == F1:
-            print('F2==F1 2100 line')
-        DE=-F2*(E2-E1)/(F2-F1)
-        #print(DE)
-        E1 = E2
-        F1 = F2
-        E2 = E1 + DE
-        if E2 > 0:
-            E2 = -TOLE
-    #print('return')
-    return [E, E2, F2, XIN_, XOUT_]
+    y_nm1 = y_init[0] # y index n-1
+    y_n = y_init[1] # y index n+1
+    
+    np1 = 2 # индекс n+1, 0 и 1 для x пропускаем
+    len_x = len(x)
+    while (np1 <= len_x - 1):
+        k2_np1 = (calc_k2(x[np1], gamma, epsilon)) # k^2 индекс n+1
+        print(k2_np1)
+        k2_n = (calc_k2(x[np1-1], gamma, epsilon))
+        print(k2_n)
+        k2_nm1 = (calc_k2(x[np1-2], gamma, epsilon))
+        print(k2_nm1)
         
+        y_np1 = calc_y_np1(y_nm1, y_n, dx, k2_nm1, k2_n, k2_np1)
+        y_res.append(y_np1)
+        np1 +=1
     
-    
+    return y_res  
+
+V0 = 1
+a = 1 # Единица длины
+m = 1
+h_ = 1
+gamma = (2*m*(a**2)*V0) / (h_**2)
+X_MIN = 0.1 # Левая граница класс. запрещ. области psi(x_min) = 0
+X_MAX = 3 # Правая граница класс. запрещ. области psi(x_max) = 0
+
+
 # Расчёт S при малой E для нахождения n состояний
 E = -TOLE
+epsilon = E / V0
+
 [XIN, XOUT] = calc_XIN_XOUT(E)
-print(XIN, XOUT)
-s = calc_s(XIN, XOUT, E)
-NMAX = s/np.pi - 0.5
-NLEV = NMAX+1
 
-results = [[], [], []]
-xin = []
-xout = []
-energies = []
+X_m = (XIN + XOUT) / 2 # Точка сшивки
 
-E1 = -1
-F1 = -np.pi/2 #Функция f = s-(n+0.5)pi, см тетрадь
-for N in range (0, int(NMAX)):
-    E2 = E1 + abs(E1)/4
-    DE = 2*TOLE
-    [E, E2, F2, XIN, XOUT] = calc_Energy(N, E1, E2, DE, F1, s, XIN, XOUT)
-    xin.append(XIN)
-    xout.append(XOUT)
-    energies.append(E)
+N_pts_integral = 100
+X_FROM = X_MIN
+X_TO = X_m
+x = np.linspace(X_FROM, X_TO, N_pts_integral)
 
-def get_const_func(from_, to_, val):
-    y = []
-    x = np.linspace(from_, to_, 50)
-    for i in range(0, len(x)):
-        y.append(val)
-    return [x, y]
+dx = (X_FROM - X_TO) / (N_pts_integral - 1)
 
-fig = plt.figure()
-subplot = fig.add_subplot(111)
-
-for i in range(0, len(energies)):
-    [x, y] = get_const_func(xin[i], xout[i], energies[i])
-    subplot.plot(x, y, 'k', label='Energy level '+str(i))
-    
-subplot.legend()
+y_0 = 0 # y(x_MIN)
+y_1 = 1 # Произвольная константа
+y_init_cond = [y_0, y_1]
+y = Numerov_calc(y_init_cond, x, dx, gamma, epsilon)
+fig =  plt.figure()
+subplot = fig.add_subplot()
+subplot.plot(x, y)
 fig.show()
+
+
+    
+    
+
+
+
+
+
     
     
 
