@@ -173,16 +173,26 @@ k2 = calc_k2(eps_0, x)
 print('k2=', k2)
 
 dx2 = ((1.0) / (N-1))**2 # dx^2
-Psi = my_wavefunction(eps_0, k2, N, dx2)
-
+Psi_left = my_wavefunction(eps_0, k2, N, dx2)
+Psi_left = [-p for p in Psi_left]
 fig = plt.figure()
 subplot = fig.add_subplot(111)
-subplot.plot(x, Psi)
+subplot.plot(x, Psi_left)
 fig.show()
 
 
 # Експоненциально нарастающее решение справа (Интегрирование вовнутрь класс. разреш. области)
-#x = np.linspace
+x = np.linspace(3, X_m, N)
+k2 = calc_k2(eps_0, x)
+
+print('k2 right=', k2)
+
+Psi_right = my_wavefunction(eps_0, k2, N, dx2)
+
+fig = plt.figure()
+subplot = fig.add_subplot(111)
+subplot.plot(x, Psi_right)
+fig.show()
 
 
 
