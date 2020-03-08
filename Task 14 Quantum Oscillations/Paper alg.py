@@ -91,8 +91,9 @@ fig.show()'''
 
 
 
-def my_wavefunction(ep, k2, N, l2):
-    Psi = [0, 1e-4] #initial cond
+def my_wavefunction(ep, k2, N, l2, init_cond):
+    #Psi = [0, 1e-4] #initial cond
+    Psi = [init_cond[0], init_cond[1]]
     #Psi[0] = 0
     #Psi[1] = 1e-4
 
@@ -104,16 +105,16 @@ def my_wavefunction(ep, k2, N, l2):
     return Psi
 
 
-def my_epsilon(eps, deps, N, l2, x):
+def my_epsilon(eps, deps, N, l2, x, init_cond):
     #k2 = g2*(eps-v)
     k2 = calc_k2(eps, x)#g2*(eps - v)
-    Psi = my_wavefunction(eps, k2, N, l2)
+    Psi = my_wavefunction(eps, k2, N, l2, init_cond)
     P1 = Psi[N-1]
     eps += deps
 
     while(abs(deps) > 1e-12):
         k2 = calc_k2(eps, x)#g2*(eps - v)
-        Psi = my_wavefunction(eps, k2, N, l2)
+        Psi = my_wavefunction(eps, k2, N, l2, init_cond)
         P2 = Psi[N-1]
 
         if P1*P2 <0:
@@ -158,7 +159,7 @@ subplot = fig.add_subplot(111)
 subplot.plot(x, Psi)
 fig.show()'''
 
-def calc_Psi(eps_0, N, g2, FROM, TO, XIN, XOUT):
+def calc_Psi(eps_0, N, g2, FROM, TO, XIN, XOUT, init_cond):
     
     
     X_m = (XIN + XOUT) / 2
@@ -170,7 +171,7 @@ def calc_Psi(eps_0, N, g2, FROM, TO, XIN, XOUT):
    
     dx = (FROM - TO) / (N-1)
     dx2 =  dx ** 2
-    Psi = my_wavefunction(eps_0, k2, N, dx2)
+    Psi = my_wavefunction(eps_0, k2, N, dx2, init_cond)
     return [Psi, x, X_m]
     
    
@@ -179,12 +180,12 @@ eps_0 = -0.6
 [XIN, XOUT] = calc_XIN_XOUT(eps_0)
 
 X_m = (XIN + XOUT) / 2
-[Psi_left, x_left, X_m] = calc_Psi(eps_0, 100, 200, 0.01, X_m, XIN, XOUT)
+[Psi_left, x_left, X_m] = calc_Psi(eps_0, 100, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
 x_continue = x_left[len(x_left) - 2] # значение в которой надо сосчитать
 print('x_continue'+str(x_continue))
 Psi_left = [-p for p in Psi_left]
 
-[Psi_right, x_right, X_m] = calc_Psi(eps_0, 100, 200, 3, x_continue, XIN, XOUT)
+[Psi_right, x_right, X_m] = calc_Psi(eps_0, 100, 200, 3, x_continue, XIN, XOUT, [0, 1e-4])
 
 fig = plt.figure()
 subplot = fig.add_subplot(121)
@@ -226,11 +227,11 @@ def my_epsilon_(eps, deps, N):
     X_m = (XIN + XOUT) / 2
 
 
-    [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT)
+    [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
     x_continue = x_left[len(x_left) - 2] # значение в которой надо сосчитать
        
     Psi_left = [-p for p in Psi_left]
-    [Psi_right, x_right, X_m] = calc_Psi(eps, N, 200, 3, x_continue, XIN, XOUT)
+    [Psi_right, x_right, X_m] = calc_Psi(eps, N, 200, 3, x_continue, XIN, XOUT, [0, 1e-4])
 
     # Нормировка
     right_val = Psi_right[len(Psi_right)-1]
@@ -250,12 +251,12 @@ def my_epsilon_(eps, deps, N):
 
         X_m = (XIN + XOUT) / 2
         
-        [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT)
+        [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
         x_continue = x_left[len(x_left) - 2] # значение в которой надо сосчитать
         
         Psi_left = [-p for p in Psi_left]
 
-        [Psi_right, x_right, X_m] = calc_Psi(eps, N, 200, 3, x_continue, XIN, XOUT)
+        [Psi_right, x_right, X_m] = calc_Psi(eps, N, 200, 3, x_continue, XIN, XOUT, [0, 1e-4])
 
         # Нормировка
         right_val = Psi_right[len(Psi_right)-1]
@@ -292,22 +293,36 @@ def test(eps):
     subplot.plot(x_right, Psi_right, label = 'Psi right, eps='+str(eps))
     subplot.legend()
     fig.show()
+    return [Psi_left, x_left, Psi_right, x_right, eps_real]
     
-#eps = my_epsilon_(eps_0, 0.05, 100)
 
-#test(-0.3)
-#test(-0.4)
-#test(-0.5)
-test(-0.6)
-test(-0.7)
-test(-0.75)
-test(-0.8)
-test(-0.9)
 
+def find_index(x, value, accuracy):
+    for i in range(0,len(x)):
+        if abs(x[i] - value) <= accuracy:
+            return i
+    return -1
+
+eps = -0.9
+[Psi_left, x_left, Psi_right, x_right, eps_real] = test(eps)
+[XIN, XOUT] = calc_XIN_XOUT(eps_real)
+y_init_index = find_index(Psi_left, XIN, 0.05)
+
+y_init0 = Psi_left[y_init_index-1]
+y_init1 = Psi_left[y_init_index]
+
+
+#def calc_Psi(eps_0, N, g2, FROM, TO, XIN, XOUT, init_cond):
+
+[Psi, x, xm ] = calc_Psi(eps_real, 100, 200, XIN, XOUT, XIN, XOUT, [y_init0, y_init1])
 
 
         
     
-    
+fig = plt.figure()
+subplot = fig.add_subplot(111)
+subplot.plot(x, Psi, label = 'Psi')
+subplot.legend()
+fig.show()
     
 
