@@ -190,9 +190,21 @@ print('k2 right=', k2)
 Psi_right = my_wavefunction(eps_0, k2, N, dx2)
 
 fig = plt.figure()
-subplot = fig.add_subplot(111)
+subplot = fig.add_subplot(121)
 subplot.plot(x, Psi_right)
+#fig.show()
+
+
+# нормировка, чтобы функции сшились в X_m
+right_val = Psi_right[len(Psi_right)-1]
+left_val = Psi_left[len(Psi_left)-1]
+ratio = right_val / left_val
+Psi_left = [p*ratio for p in Psi_left]
+x = np.linspace(0.01, X_m, N)
+subplot = fig.add_subplot(122)
+subplot.plot(x, Psi_left)
 fig.show()
+
 
 
 
