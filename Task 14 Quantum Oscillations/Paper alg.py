@@ -248,7 +248,6 @@ def my_epsilon_(eps, deps, N):
     
     while(abs(deps) > 1e-12):
         [XIN, XOUT] = calc_XIN_XOUT(eps)
-
         X_m = (XIN + XOUT) / 2
         
         [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
@@ -282,6 +281,11 @@ def my_epsilon_(eps, deps, N):
 
 
 
+def calc_real_energy(eps):
+    [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, 100)
+    [XIN, XOUT] = calc_XIN_XOUT(eps_real)
+    return [Psi_left, x_left, Psi_right, x_right, eps_real, XIN, XOUT]
+
 # точное значение энергии, через сшивку производных
 def test(eps):
     [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, 100)
@@ -303,6 +307,8 @@ def find_index(x, value, accuracy):
             return i
     return -1
 
+'''# Тест, считается ли волновая функция на промежутке корректно
+
 eps = -0.9
 [Psi_left, x_left, Psi_right, x_right, eps_real] = test(eps)
 [XIN, XOUT] = calc_XIN_XOUT(eps_real)
@@ -311,18 +317,53 @@ y_init_index = find_index(Psi_left, XIN, 0.05)
 y_init0 = Psi_left[y_init_index-1]
 y_init1 = Psi_left[y_init_index]
 
-
-#def calc_Psi(eps_0, N, g2, FROM, TO, XIN, XOUT, init_cond):
-
 [Psi, x, xm ] = calc_Psi(eps_real, 100, 200, XIN, XOUT, XIN, XOUT, [y_init0, y_init1])
-
-
-        
+       
     
 fig = plt.figure()
 subplot = fig.add_subplot(111)
 subplot.plot(x, Psi, label = 'Psi')
 subplot.legend()
+fig.show()'''
+
+def get_const_func(from_, to_, val):
+    y = []
+    x = np.linspace(from_, to_, 50)
+    for i in range(0, len(x)):
+        y.append(val)
+    return [x, y]
+
+def plot_energy_levels(subplot, eps):
+    [Psi_left, x_left, Psi_right, x_right, eps_real, XIN, XOUT] = calc_real_energy(eps)
+    #[eps_real, Psi_left, x_left, Psi_right, x_right, XIN, XOUT] = calc_real_energy(eps)
+    print('eps real', eps_real)
+    [x, y] = get_const_func(XIN, XOUT, eps_real)
+    subplot.plot(x, y, label = 'Energy Level, eps = '+str(eps))
+
+fig = plt.figure()
+subplot = fig.add_subplot(121)
+plot_energy_levels(subplot, -0.9)
+plot_energy_levels(subplot, -0.85)
+plot_energy_levels(subplot, -0.75)
+plot_energy_levels(subplot, -0.8)
+plot_energy_levels(subplot, -0.7)
+plot_energy_levels(subplot, -0.6)
+plot_energy_levels(subplot, -0.65)
+plot_energy_levels(subplot, -0.5)
+plot_energy_levels(subplot, -0.3)
+plot_energy_levels(subplot, -0.2)
+
 fig.show()
+
+'''test(-0.9)
+test'(-0.8)
+test(-0.7)
+test(-0.6)
+test(-0.5)
+test(-0.4)
+test(-0.3)'''
+
+
+
     
 
