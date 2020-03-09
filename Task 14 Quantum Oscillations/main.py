@@ -117,7 +117,7 @@ def calc_Psi(eps_0, N, g2, x, FROM, TO, init_cond):
     
    
 # Експоненциально нарастающее решение слева
-eps_0 = -0.9
+eps_0 = -0.2
 from_ = 0.01
 to_ = 3
 N = 200
@@ -170,6 +170,36 @@ subplot.plot(x, Psi_right, label = 'Psi right')
 subplot.legend()
 fig.show()
 
+def integral(x, y):
+    i = 0
+    integral=0
+    h = abs(x[1] - x[0])
+    while i<= len(x)-2:
+        y_0 = y[i+1]
+        y_prev = y[i]
+        y_next = y[i+1]
+        J1 = (h/3)*(y_next+y_prev+4*y_0)
+        integral+=J1
+        i+=3
+    return integral
+
+def Simpson_integrate(x_left, Psi_left, x_right, Psi_right):
+    Psi_left = [p*p for p in Psi_left]
+    Psi_right = [p*p for p in Psi_right]
+    half_left = integral(x_left, Psi_left)
+    half_right = integral(x_right, Psi_right)
+    '''i = 0
+    integral=0
+    h = abs(x_left[1] - x_left[0])
+    while i<= len(x)-2:
+        y_0 = Psi_left[i+1]
+        y_prev = Psi_left[i]
+        y_next = Psi_left[i+1]
+        J1 = (h/3)*(y_next+y_prev+4*y_0)
+        integral+=J1
+        i+=3'''
+        
+    return half_left + half_right
 
 def my_epsilon_(eps, deps, N, g2, FROM, TO):
 
@@ -234,8 +264,14 @@ def my_epsilon_(eps, deps, N, g2, FROM, TO):
         #print('eps=' + str(eps) + 'deps=' + str(deps))
         diff1 = diff2
 
-    # нормировка волновых функций
-    
+    # нормировка волновых функций на единицу
+    Integral = Simpson_integrate(x_left, Psi_left, x_right, Psi_right)
+    print('Integral = ', Integral)
+    #Psi_left = [p / Integral for p in Psi_left]
+    #Psi_right = [p / Integral for p in Psi_right]
+    max_ = max(max(Psi_left), max(Psi_right))
+    Psi_left = [p / max_ for p in Psi_left]
+    Psi_right = [p / max_ for p in Psi_right]
     return [eps, Psi_left, x_left, Psi_right, x_right]
 
 
@@ -273,6 +309,9 @@ plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.8, 200, 200, 0.01, 3)
 plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.7, 200, 200, 0.01, 3)
 plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.6, 200, 200, 0.01, 3)
 plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.5, 200, 200, 0.01, 3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.3, 200, 200, 0.01, 3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.2, 200, 200, 0.01, 3)
+
 fig.show()
 
 
