@@ -1,25 +1,18 @@
 import sys
 import numpy as np
+
 import matplotlib.pyplot as plt
  
 from scipy import integrate
 
 
 
-
-
-TOLE = 0.0005
-gamma = 42.7
 X_accuracy = 0.005
 X_min = 2**(1/6)
 
-N_integral = 150 
-
-
+    
 def LenardJones(x):
     return 4*(x**(-12) - x**(-6))
-
-   
 
 def calc_XIN_XOUT(E):
     dx = 0.1
@@ -43,81 +36,248 @@ def calc_XIN_XOUT(E):
     
     return [XIN, XOUT]
 
-def calc_k2(x, gamma, epsilon):
-    return (gamma**2) * (epsilon - LenardJones(x))
 
 
-def calc_y_np1(y_nm1, y_n, dx, k2nm1, k2n, k2np1):
-    const1 = 1 / (1 + (dx**2) * k2np1 / 12)
-    const2 = 1 - (5 * (k2n) * (dx**2) / 12)
-    const3 = 1 + ((dx**2) * (k2nm1) / 12)
+N = 1000
+Psi = np.zeros(N)
+g2 = 200
+v = (-1)*np.ones(N)
+ep = -0.9
+k2 = g2*(ep-v)
+l2 = ((1.0) / (N-1))**2
 
-    ynp1 = const1 * (2 * const2 * y_n - const3 * y_nm1)
-    return ynp1
+def wavefunction(ep, k2, N):
+    Psi[0] = 0
+    Psi[1] = 1e-4
 
-def Numerov_calc(y_init, x, dx, gamma, epsilon):
-    y_res = [y_init[0], y_init[1]]
+    for i in range(2, N):
+        Psi[i] = (2*(1-(5.0/12)* l2 * k2[i-1])*Psi[i-1]
+                  -(1+(1.0/12) * l2 * k2[i-2]) * Psi[i-2]) / (1 + (1.0/12) * l2 * k2[i])
+    return Psi
+
+def epsilon(eps, deps, N):
+    k2 = g2*(eps-v)
+    wavefunction(Psi, k2, N)
+    P1 = Psi[N-1]
+    eps += deps
+
+    while(abs(deps) > 1e-12):
+        k2 = g2*(eps - v)
+        wavefunction(Psi, k2, N)
+        P2 = Psi[N-1]
+
+        if P1*P2 <0:
+            deps = -deps/2
+        eps = eps + deps
+        #print('eps=' + str(eps) + 'deps=' + str(deps))
+        P1 = P2
+    return eps
+
+
+def my_wavefunction(ep, k2, N, l2, init_cond):
     
-    y_nm1 = y_init[0] # y index n-1
-    y_n = y_init[1] # y index n+1
+    Psi = [init_cond[0], init_cond[1]]
     
-    np1 = 2 # индекс n+1, 0 и 1 для x пропускаем
-    len_x = len(x)
-    while (np1 <= len_x - 1):
-        k2_np1 = (calc_k2(x[np1], gamma, epsilon)) # k^2 индекс n+1
-        print(k2_np1)
-        k2_n = (calc_k2(x[np1-1], gamma, epsilon))
-        print(k2_n)
-        k2_nm1 = (calc_k2(x[np1-2], gamma, epsilon))
-        print(k2_nm1)
-        
-        y_np1 = calc_y_np1(y_nm1, y_n, dx, k2_nm1, k2_n, k2_np1)
-        y_res.append(y_np1)
-        np1 +=1
+    for i in range(2, N):
+        val = (2*(1-(5.0/12)* l2 * k2[i-1])*Psi[i-1]
+                  -(1+(1.0/12) * l2 * k2[i-2]) * Psi[i-2]) / (1 + (1.0/12) * l2 * k2[i])
+        Psi.append(val)
+    return Psi
+
+
+def calc_k2(eps, x, FROM, TO):
+    k2_res = []
+    for i in range(0, len(x)):
+        if (FROM <= x[i] <= TO or TO <= x[i] <= FROM):
+            k2_ = g2*(eps - LenardJones(x[i]))
+            k2_res.append(k2_)
+    return k2_res
+
+
+def calc_Psi(eps_0, N, g2, x, FROM, TO, init_cond):
     
-    return y_res  
+    #X_m = (XIN + XOUT) / 2
 
-V0 = 1
-a = 1 # Единица длины
-m = 1
-h_ = 1
-gamma = (2*m*(a**2)*V0) / (h_**2)
-X_MIN = 0.1 # Левая граница класс. запрещ. области psi(x_min) = 0
-X_MAX = 3 # Правая граница класс. запрещ. области psi(x_max) = 0
+    #TO = X_m     
+    #x = np.linspace(FROM, TO, N)
+    x_res = []
+    for i in range(0, len(x)):
+        if (FROM <= x[i] <= TO or TO <= x[i] <= FROM):
+            x_res.append(x[i])
+    
+    k2 = calc_k2(eps_0, x_res, FROM, TO)
+    
+    #print('x_res=\n' , x_res)
+    dx = abs(x_res[1]-x_res[0])#(FROM - TO) / (N-1)
+    dx2 =  dx ** 2
+    ''' print(k2)'''
+    
+    Psi = my_wavefunction(eps_0, k2, len(x_res), dx2, init_cond)
+    return [Psi, x_res]#[Psi, x, X_m]
+    
+   
+# Експоненциально нарастающее решение слева
+eps_0 = -0.9
+from_ = 0.01
+to_ = 3
+N = 200
+[XIN, XOUT] = calc_XIN_XOUT(eps_0)
+X_m = (XIN + XOUT) / 2
 
 
-# Расчёт S при малой E для нахождения n состояний
-E = -TOLE
-epsilon = E / V0
+#print('x_left' , x_left)
 
-[XIN, XOUT] = calc_XIN_XOUT(E)
 
-X_m = (XIN + XOUT) / 2 # Точка сшивки
+x = np.linspace(from_, X_m, N)
+gamma2 = 200
+x_continue = x[len(x) - 2]
+print('x_cont=' , x_continue)
+[Psi_left, x_left] = calc_Psi(eps_0, N, gamma2, x, from_, X_m, [0, 1e-4])
 
-N_pts_integral = 100
-X_FROM = X_MIN
-X_TO = X_m
-x = np.linspace(X_FROM, X_TO, N_pts_integral)
 
-dx = (X_FROM - X_TO) / (N_pts_integral - 1)
+x = np.linspace(to_, X_m, N)
+x = np.append(x, x_continue)
+[Psi_right, x_right] = calc_Psi(eps_0, N, gamma2, x, to_, x_continue, [0, 1e-4])
 
-y_0 = 0 # y(x_MIN)
-y_1 = 1 # Произвольная константа
-y_init_cond = [y_0, y_1]
-y = Numerov_calc(y_init_cond, x, dx, gamma, epsilon)
-fig =  plt.figure()
-subplot = fig.add_subplot()
-subplot.plot(x, y)
+
+fig = plt.figure()
+subplot = fig.add_subplot(121)
+subplot.plot(x_left, Psi_left, label = 'Psi left calibrated')
+subplot.legend()
+subplot = fig.add_subplot(122)
+subplot.plot(x_right, Psi_right, label = 'Psi right calibrated')
+subplot.legend()
 fig.show()
 
 
+# нормировка, чтобы функции сшились в X_m
+right_val = Psi_right[len(Psi_right) - 2]
+print('right_val=', right_val)
+
+left_val = Psi_left[len(Psi_left)-1]
+print('left_val=', left_val)
+ratio = (right_val / left_val)
+Psi_left = [p*ratio for p in Psi_left]
+x = np.linspace(0.01, X_m, len(Psi_left))
+fig = plt.figure()
+subplot = fig.add_subplot(121)
+subplot.plot(x, Psi_left, label = 'Psi left')
+subplot.legend()
+
+subplot = fig.add_subplot(122)
+x = np.linspace(X_m, 3, len(Psi_right))
+subplot.plot(x, Psi_right, label = 'Psi right')
+subplot.legend()
+fig.show()
+
+
+def my_epsilon_(eps, deps, N, g2, FROM, TO):
+
+    [XIN, XOUT] = calc_XIN_XOUT(eps)
+
+    X_m = (XIN + XOUT) / 2
+
+    x = np.linspace(FROM, X_m, N)
+
+    x_continue = x[len(x) - 2]
+    print('x_cont=' , x_continue)
+    [Psi_left, x_left] = calc_Psi(eps, N, gamma2, x, FROM, X_m, [0, 1e-4])
+       
+    x = np.linspace(TO, X_m, N)
+    x = np.append(x, x_continue)
+    [Psi_right, x_right] = calc_Psi(eps, N, gamma2, x, TO, x_continue, [0, 1e-4])
+
     
+    # Нормировка
+    right_val = Psi_right[len(Psi_right)-2]
+    left_val = Psi_left[len(Psi_left)-1]
+    ratio = (right_val / left_val)
+    Psi_left = [p*ratio for p in Psi_left]
+
+
+    val_to_check_right = Psi_right[len(Psi_right) - 1]
+    val_to_check_left = Psi_left[len(Psi_left) - 2]
+
+    diff1 = val_to_check_right - val_to_check_left
+    #print('diff1', diff1)
+    
+    while(abs(deps) > 1e-12):
+        x = np.linspace(FROM, X_m, N)
+
+        x_continue = x[len(x) - 2]
+        print('x_cont=' , x_continue)
+        [Psi_left, x_left] = calc_Psi(eps, N, gamma2, x, FROM, X_m, [0, 1e-4])
+       
+        x = np.linspace(TO, X_m, N)
+        x = np.append(x, x_continue)
+        [Psi_right, x_right] = calc_Psi(eps, N, gamma2, x, TO, x_continue, [0, 1e-4])
+
+    
+        # Нормировка
+        right_val = Psi_right[len(Psi_right)-2]
+        left_val = Psi_left[len(Psi_left)-1]
+        ratio = (right_val / left_val)
+        Psi_left = [p*ratio for p in Psi_left]
+
+
+        val_to_check_right = Psi_right[len(Psi_right) - 1]
+        val_to_check_left = Psi_left[len(Psi_left) - 2]
+       # print('vals to check:', val_to_check_right, val_to_check_left)
+
+        diff2 = val_to_check_right - val_to_check_left
+
+
+        if diff1*diff2 <0:
+            print('damn')
+            deps = -deps/2
+        eps = eps + deps
+        #print('eps=' + str(eps) + 'deps=' + str(deps))
+        diff1 = diff2
+
+    # нормировка волновых функций
+    
+    return [eps, Psi_left, x_left, Psi_right, x_right]
+
+
+
+def calc_real_energy(eps, N, gamma2, FROM, TO):
+    [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, N, gamma2, FROM, TO)
+    [XIN, XOUT] = calc_XIN_XOUT(eps)
+    return [Psi_left, x_left, Psi_right, x_right, eps_real, XIN, XOUT]
+
+
+def get_const_func(from_, to_, val):
+    y = []
+    x = np.linspace(from_, to_, 50)
+    for i in range(0, len(x)):
+        y.append(val)
+    return [x, y]
+
+def plot_energy_levels(subplot_energies, subplot_wavefuncs, eps, N, gamma2, FROM, TO):
+    [Psi_left, x_left, Psi_right, x_right, eps_real, XIN, XOUT] = calc_real_energy(eps, N, gamma2, FROM, TO)
+    
+    [x, y] = get_const_func(XIN, XOUT, eps)
+    subplot_energies.plot(x, y, label = 'Energy Level, eps = '+str(eps))
+    subplot_energies.legend()
+    
+    subplot_wavefuncs.plot(x_left, Psi_left, label = 'eps = '+str(eps))
+    subplot_wavefuncs.plot(x_right, Psi_right, label = 'eps = '+str(eps))
+    subplot_wavefuncs.legend()
     
 
+fig = plt.figure()
+subplot_energies = fig.add_subplot(121)
+subplot_wavefuncs = fig.add_subplot(122)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.9, 200, 200, 0.01, 3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.8, 200, 200, 0.01, 3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.7, 200, 200, 0.01, 3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.6, 200, 200, 0.01, 3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.5, 200, 200, 0.01, 3)
+fig.show()
 
 
 
 
-    
+
     
 
