@@ -1,3 +1,4 @@
+from __future__ import division
 import matplotlib.pyplot as plt
 import scipy.fft as sp 
 from scipy.fft import fft, fftfreq, fftshift
@@ -189,7 +190,7 @@ def calc_and_plot(Filter_Func, Sample_Func, title):
     fig.show()
 
 # Скользящее окно
-Window = Function(FuncParams(0, 3, 1, 1, 0, 100))
+'''Window = Function(FuncParams(0, 3, 1, 1, 0, 100))
 Window.calc(step, 1, 2)
 
 
@@ -210,7 +211,7 @@ sin_Func_a = Function((FuncParams(-np.pi*2, np.pi*2, 1, Omega, 0, 500)))
 sin_Func_a.calc(np.sin)
 sin_Func_a.noize(noize_intensity, noize_level)
 
-calc_and_plot(Window, sin_Func_a, 'noizy sin, w='+str(Omega))
+calc_and_plot(Window, sin_Func_a, 'noizy sin, w='+str(Omega))'''
 
 
 def cut_filter(x_fft, y_fft, cut_percent):
@@ -241,8 +242,7 @@ def normalize(y, val):
         y[i] = y[i]/val
     return y    
     
-
-# Проверка на частотную характеристику ограниченного фильтра
+'''# Проверка на частотную характеристику ограниченного фильтра
 Filter_len_cut = 0.5 # процент, насколько усекаем множество значений импульсной характеристики (выбор длины фильтра)
 Freq_character = Function((FuncParams(from_=0, to=400, ampl=1, omega=1, shift=0, N=1000)))
 Freq_character.calc(meander, 0, 150)
@@ -259,10 +259,10 @@ subplot.plot(x_fft, calc_module(y_fft), label='Impulse characteristics')
 [cut_fft_x, cut_fft_y] = cut_filter(x_fft, y_fft, Filter_len_cut) # срезаем часть фурье образа (выбор длины фильтра)
 subplot.plot(cut_fft_x, calc_module(cut_fft_y), label='Cut Impulse characteristics', color = 'r', marker='.')
 
-subplot.legend()
+subplot.legend()'''
 
 
-# После обратного Фурье от урезанной характеристики фильтра
+'''# После обратного Фурье от урезанной характеристики фильтра
 res_y = np.fft.ifft(cut_fft_y)
 
 
@@ -274,7 +274,7 @@ subplot.plot(x, calc_module(res_y), color = 'green', marker = '.', label = 'Cut 
 #subplot.plot(Freq_character.x, Freq_character.y, 'r--', label='Source Filter Charact')
 
 subplot.legend()
-fig.show()
+fig.show()'''
 
 
 
@@ -322,20 +322,113 @@ def calc_and_plot_filter(f_cut, filt_len, N_filt_points, src_Func, freq, title):
     
     
 
-# Через аналитическую функцию
-f_cut = 0.1
+'''# Через аналитическую функцию
 f=2
+f_cut = 4*f
+
 
 filter_len = 50
 N_points_filter = 1000
 
-sin_Func = Function((FuncParams(-15/f, 15/f, 1, 1, 0, 1500)))
+sin_Func = Function((FuncParams(0, 3/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
 
 f1 = 3*f
 f2 = 10*f
 sin_Func.y = np.sin(f1 * 2*np.pi * sin_Func.x) + np.sin(f2 * 2*np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src='+str(f1)+' and '+ str(f2)+ ', f cut='+str(f_cut))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src='+str(f1)+' and '+ str(f2)+ ', f cut='+str(f_cut))'''
+
+
+
+def low_pass_filter(Function, cut_freq, transition_bend):
+    
+    #b = 0.08  # Transition band, as a fraction of the sampling rate (in (0, 0.5)).
+    N = int(np.ceil((4 / transition_bend)))
+    if not N % 2: N += 1  # Make sure that N is odd.
+    n = np.arange(N)
+     
+    # Compute sinc filter.
+    h = np.sinc(2 * cut_freq * (n - (N - 1) / 2))
+    
+     
+    # Compute Blackman window.
+    w = 0.42 - 0.5 * np.cos(2 * np.pi * n / (N - 1)) + \
+        0.08 * np.cos(4 * np.pi * n / (N - 1))
+     
+    # Multiply sinc filter by window.
+    h = h * w
+     
+    # Normalize to get unity gain.
+    h = h / np.sum(h)
+
+    #sin_Func = Function((FuncParams(t_from, t_to, 1, 1, 0, points_numb))) # от времени
+    #sin_Func.reset_x()
+
+
+    #sin_Func.y = np.sin(f1 * 2*np.pi * sin_Func.x) + np.sin(f2 * 2*np.pi * sin_Func.x)
+
+    y_conv = np.convolve(Function.y, h)
+
+    fig = plt.figure()
+    sp_src = fig.add_subplot(131)
+    sp_src.plot(Function.x, Function.y, label = 'src signal')
+
+    x_filtered = np.linspace(Function.From, Function.To, len(y_conv))
+    #sp_src.plot(x_filtered, y_conv, label = 'filtered signal')
+    sp_src.legend()
+
+    sp_filtered  = fig.add_subplot(132)
+    sp_filtered.plot(x_filtered, y_conv, label = 'filtered signal')
+    sp_filtered.legend()
+
+    sp_window = fig.add_subplot(133)
+    sp_window.plot(n, w, label = 'window')
+    sp_window.plot(n, h, label = 'sinc')
+    sp_window.legend()
+    fig.show()
+
+
+points_numb = 500
+t_from = 0
+t_to = 1
+f1 = 10
+f2 = 50
+sampling_rate = points_numb / (t_to - t_from)
+f_cut_actual = 1
+f_cut_parameter =  f_cut_actual / sampling_rate
+sin_Func = Function((FuncParams(t_from, t_to, 1, 1, 0, points_numb))) # от времени
+sin_Func.reset_x()
+sin_Func.y = np.sin(f1 * 2*np.pi * sin_Func.x) + np.sin(f2 * 2*np.pi * sin_Func.x)
+low_pass_filter(sin_Func, f_cut_parameter, 0.08)
+
+
+# Пример сначала с обной частотой, потом с другой
+points_numb=500
+f_1 = 1
+f_2 = 3
+left_border = 0
+right_border = np.pi
+x = np.linspace(left_border, right_border, points_numb)
+y = np.sin(2*np.pi*f_1*x)
+
+x = np.linspace(np.pi, 2*np.pi, points_numb)
+y_temp = np.sin(2*np.pi*f_2*x)
+y_concat=np.concatenate([y,y_temp])
+
+
+Double_freq_func = Function((FuncParams(from_=-2*np.pi, to=2*np.pi, ampl=1, omega=1, shift=0, N=1000)))
+
+
+x = np.linspace(0, 2*np.pi, 2*points_numb)
+Double_freq_func.x=x
+Double_freq_func.y=np.concatenate([y,y_temp])
+
+t_to = 2*np.pi
+t_from = 0
+sampling_rate = points_numb / (t_to - t_from)
+f_cut_actual = 1
+f_cut_parameter =  f_cut_actual / sampling_rate
+low_pass_filter(Double_freq_func, f_cut_parameter, 0.08)
 
 
 # Срезание частоты ещё пример
@@ -354,7 +447,7 @@ sin_Func.noize(noize_intensity, noize_level)
 
 calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'noizy sin, f= '+str(f)+' f cut='+str(f_cut))
 
-# Пример как выше, но частота среза больше
+'''# Пример как выше, но частота среза больше
 f_cut = 1000
 f = 50
 filter_len = 50
@@ -378,9 +471,9 @@ f1=f
 f2=3*f
 f3=9*f
 sin_Func.y = np.sin(f1 * 2 * np.pi * sin_Func.x) + 1*np.sin(f2 * 2 * np.pi * sin_Func.x) +1*np.sin(f3 * 2 * np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f1=' +str(f1)+'f2='+str(f2)+'f3='+str(f3)+ 'f cut ='+str(f_cut))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f1=' +str(f1)+'f2='+str(f2)+'f3='+str(f3)+ 'f cut ='+str(f_cut))'''
 
-# Пример как выше, но частота среза больше
+'''# Пример как выше, но частота среза больше
 f_cut = 300
 f = 50
 filter_len = 50
@@ -389,11 +482,11 @@ sin_Func = Function((FuncParams(-2/f, 2/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
 
 sin_Func.y = np.sin(f * 2 * np.pi * sin_Func.x) + 1*np.sin(3*f * 2 * np.pi * sin_Func.x) +1*np.sin(9*f * 2 * np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=50, 150, 950, f cut ='+str(f_cut))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'sin sum, f src=50, 150, 950, f cut ='+str(f_cut))'''
 
 
 
-# Пример обрезания частоты
+'''# Пример обрезания частоты
 f_cut = 1
 f=2
 f_src = 20*f
@@ -403,13 +496,13 @@ sin_Func = Function((FuncParams(-4/f, 4/f, 1, 1, 0, 1500)))
 sin_Func.reset_x()
 
 sin_Func.y = np.sin(f_src * 2 * np.pi * sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'f src= ' +str(f_src)+'f cut= '+str(f_cut))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f, 'f src= ' +str(f_src)+'f cut= '+str(f_cut))'''
 
 
 
 
 
-# Пример сначала с обной частотой, потом с другой
+'''# Пример сначала с обной частотой, потом с другой
 N=500
 f_1 = 1
 f_2 = 3
@@ -436,11 +529,11 @@ filter_len = 50
 N_points_filter = 600
 
 
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, Double_freq_func, f, 'Double freq, f src='+str(f_1)+' , ' + str(f_2)+'f_cut='+str(f_cut))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, Double_freq_func, f, 'Double freq, f src='+str(f_1)+' , ' + str(f_2)+'f_cut='+str(f_cut))'''
 
 
 
-# Пример обрезки синуса
+'''# Пример обрезки синуса
 f_cut = 0.15
 f1=50
 f2 = 3*f1
@@ -451,7 +544,7 @@ sin_Func = Function((FuncParams(-3/f1, 3/f1, 1, 1, 0, 1500)))
 sin_Func.reset_x()
 
 sin_Func.y = np.sin(f1  * 2*np.pi* sin_Func.x)+np.sin(f2 * 2*np.pi* sin_Func.x)
-calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f1, 'sum sin, f1= '+str(f1)+' f2= '+str(f2)+'f_cut= '+str(f_cut))#+'f3='+str(f3))
+calc_and_plot_filter(f_cut, filter_len, N_points_filter, sin_Func, f1, 'sum sin, f1= '+str(f1)+' f2= '+str(f2)+'f_cut= '+str(f_cut))#+'f3='+str(f3))'''
 
 
     

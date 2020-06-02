@@ -54,13 +54,13 @@ def wavefunction(ep, k2, N):
                   -(1+(1.0/12) * l2 * k2[i-2]) * Psi[i-2]) / (1 + (1.0/12) * l2 * k2[i])
     return Psi
 
-'''Psi = wavefunction(ep, k2, N)
+Psi = wavefunction(ep, k2, N)
 x = np.linspace(0, 1, len(Psi))
 
 fig = plt.figure()
 subplot = fig.add_subplot(111)
 subplot.plot(x, Psi)
-fig.show()'''
+fig.show()
 
 def epsilon(eps, deps, N):
     k2 = g2*(eps-v)
@@ -80,14 +80,14 @@ def epsilon(eps, deps, N):
         P1 = P2
     return eps
 
-'''eps = epsilon(-0.01, 0.01, N)
+eps = epsilon(-0.01, 0.01, N)
 print(eps)
 x = np.linspace(0, 1, len(Psi))
 
 fig = plt.figure()
 subplot = fig.add_subplot(111)
 subplot.plot(x, Psi)
-fig.show()'''
+fig.show()
 
 
 
@@ -176,16 +176,21 @@ def calc_Psi(eps_0, N, g2, FROM, TO, XIN, XOUT, init_cond):
     
    
 # Експоненциально нарастающее решение слева
-eps_0 = -0.6
+eps_0 = -0.1
 [XIN, XOUT] = calc_XIN_XOUT(eps_0)
 
 X_m = (XIN + XOUT) / 2
 [Psi_left, x_left, X_m] = calc_Psi(eps_0, 100, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
 x_continue = x_left[len(x_left) - 2] # значение в которой надо сосчитать
 print('x_continue'+str(x_continue))
-Psi_left = [-p for p in Psi_left]
 
-[Psi_right, x_right, X_m] = calc_Psi(eps_0, 100, 200, 3, x_continue, XIN, XOUT, [0, 1e-4])
+'''print('pL before', Psi_left)'''
+'''for i in range(0, len(Psi_left)):
+    Psi_left[i] = -Psi_left[i]
+print('PL after', Psi_left)'''
+
+
+'''[Psi_right, x_right, X_m] = calc_Psi(eps_0, 100, 201, 3, x_continue, XIN, XOUT, [0, 1e-4])
 
 fig = plt.figure()
 subplot = fig.add_subplot(121)
@@ -196,47 +201,44 @@ subplot.plot(x_right, Psi_right, label = 'Psi right')
 subplot.legend()
 fig.show()
 
+print('x_right=', x_right[len(x_right) - 2])
+print('x_left=', x_left[len(x_left) - 1])'''
+
 
 # Експоненциально нарастающее решение справа (Интегрирование вовнутрь класс. разреш. области)
 # - колво точек - N, но строим до X_m - h
 
 
 
-'''fig = plt.figure()
-subplot = fig.add_subplot(121)
-subplot.plot(x_right, Psi_right, label = 'Psi right')
-subplot.legend()
-#fig.show()'''
-
 
 # нормировка, чтобы функции сшились в X_m
-right_val = Psi_right[len(Psi_right)-1]
+'''right_val = Psi_right[len(Psi_right)-2]
 left_val = Psi_left[len(Psi_left)-1]
-ratio = right_val / left_val
+ratio = (right_val / left_val)
 Psi_left = [p*ratio for p in Psi_left]
 x = np.linspace(0.01, X_m, len(Psi_left))
 subplot = fig.add_subplot(122)
 subplot.plot(x, Psi_left, label = 'Psi left')
 subplot.legend()
-fig.show()
+fig.show()'''
 
-def my_epsilon_(eps, deps, N):
+def my_epsilon_(eps, deps, N, g2):
 
     [XIN, XOUT] = calc_XIN_XOUT(eps)
 
     X_m = (XIN + XOUT) / 2
 
 
-    [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
+    [Psi_left, x_left, X_m] = calc_Psi(eps, N, g2, 0.01, X_m, XIN, XOUT, [0, 1e-4])
     x_continue = x_left[len(x_left) - 2] # значение в которой надо сосчитать
        
     Psi_left = [-p for p in Psi_left]
-    [Psi_right, x_right, X_m] = calc_Psi(eps, N, 200, 3, x_continue, XIN, XOUT, [0, 1e-4])
+    [Psi_right, x_right, X_m] = calc_Psi(eps, N, g2, 3, x_continue, XIN, XOUT, [0, 1e-4])
 
     # Нормировка
-    right_val = Psi_right[len(Psi_right)-1]
+    right_val = Psi_right[len(Psi_right)-2]
     left_val = Psi_left[len(Psi_left)-1]
-    ratio = right_val / left_val
+    ratio = (right_val / left_val)
     Psi_left = [p*ratio for p in Psi_left]
 
 
@@ -247,20 +249,20 @@ def my_epsilon_(eps, deps, N):
     print('diff1', diff1)
     
     while(abs(deps) > 1e-12):
-        [XIN, XOUT] = calc_XIN_XOUT(eps)
-        X_m = (XIN + XOUT) / 2
+        #[XIN, XOUT] = calc_XIN_XOUT(eps)
+        #X_m = (XIN + XOUT) / 2
         
-        [Psi_left, x_left, X_m] = calc_Psi(eps, N, 200, 0.01, X_m, XIN, XOUT, [0, 1e-4])
+        [Psi_left, x_left, X_m] = calc_Psi(eps, N, g2, 0.01, X_m+0.05, XIN, XOUT, [0, 1e-4])
         x_continue = x_left[len(x_left) - 2] # значение в которой надо сосчитать
         
-        Psi_left = [-p for p in Psi_left]
+        #Psi_left = [-p for p in Psi_left]
 
-        [Psi_right, x_right, X_m] = calc_Psi(eps, N, 200, 3, x_continue, XIN, XOUT, [0, 1e-4])
+        [Psi_right, x_right, X_m] = calc_Psi(eps, N, g2, 3, x_continue, XIN, XOUT, [0, 1e-4])
 
         # Нормировка
-        right_val = Psi_right[len(Psi_right)-1]
+        right_val = Psi_right[len(Psi_right)-2]
         left_val = Psi_left[len(Psi_left)-1]
-        ratio = right_val / left_val
+        ratio = (right_val / left_val)
         Psi_left = [p*ratio for p in Psi_left]
 
 
@@ -272,23 +274,26 @@ def my_epsilon_(eps, deps, N):
 
 
         if diff1*diff2 <0:
-            #print('shit')
+            print('shit')
             deps = -deps/2
         eps = eps + deps
         #print('eps=' + str(eps) + 'deps=' + str(deps))
         diff1 = diff2
+
+    # нормировка волновых функций
+    
     return [eps, Psi_left, x_left, Psi_right, x_right]
 
 
 
 def calc_real_energy(eps):
-    [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, 100)
+    [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, 100, 200)
     [XIN, XOUT] = calc_XIN_XOUT(eps_real)
     return [Psi_left, x_left, Psi_right, x_right, eps_real, XIN, XOUT]
 
 # точное значение энергии, через сшивку производных
 def test(eps):
-    [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, 100)
+    [eps_real, Psi_left, x_left, Psi_right, x_right] = my_epsilon_(eps, 0.05, 100, 200)
     print('eps=', eps, ' eps actual=\n', eps_real)
     fig = plt.figure()
     subplot = fig.add_subplot(121)
@@ -301,30 +306,9 @@ def test(eps):
     
 
 
-def find_index(x, value, accuracy):
-    for i in range(0,len(x)):
-        if abs(x[i] - value) <= accuracy:
-            return i
-    return -1
 
-'''# Тест, считается ли волновая функция на промежутке корректно
 
-eps = -0.9
-[Psi_left, x_left, Psi_right, x_right, eps_real] = test(eps)
-[XIN, XOUT] = calc_XIN_XOUT(eps_real)
-y_init_index = find_index(Psi_left, XIN, 0.05)
 
-y_init0 = Psi_left[y_init_index-1]
-y_init1 = Psi_left[y_init_index]
-
-[Psi, x, xm ] = calc_Psi(eps_real, 100, 200, XIN, XOUT, XIN, XOUT, [y_init0, y_init1])
-       
-    
-fig = plt.figure()
-subplot = fig.add_subplot(111)
-subplot.plot(x, Psi, label = 'Psi')
-subplot.legend()
-fig.show()'''
 
 def get_const_func(from_, to_, val):
     y = []
@@ -333,27 +317,27 @@ def get_const_func(from_, to_, val):
         y.append(val)
     return [x, y]
 
-def plot_energy_levels(subplot, eps):
+def plot_energy_levels(subplot_energies, subplot_wavefuncs, eps):
     [Psi_left, x_left, Psi_right, x_right, eps_real, XIN, XOUT] = calc_real_energy(eps)
-    #[eps_real, Psi_left, x_left, Psi_right, x_right, XIN, XOUT] = calc_real_energy(eps)
-    print('eps real', eps_real)
+    
     [x, y] = get_const_func(XIN, XOUT, eps_real)
-    subplot.plot(x, y, label = 'Energy Level, eps = '+str(eps))
+    subplot_energies.plot(x, y, label = 'Energy Level, eps = '+str(eps))
+    subplot_wavefuncs.plot(x_left, Psi_left, label = 'eps = '+str(eps))
+    subplot_wavefuncs.plot(x_right, Psi_right, label = 'eps = '+str(eps))
+    
 
-fig = plt.figure()
-subplot = fig.add_subplot(121)
-plot_energy_levels(subplot, -0.9)
-plot_energy_levels(subplot, -0.85)
-plot_energy_levels(subplot, -0.75)
-plot_energy_levels(subplot, -0.8)
-plot_energy_levels(subplot, -0.7)
-plot_energy_levels(subplot, -0.6)
-plot_energy_levels(subplot, -0.65)
-plot_energy_levels(subplot, -0.5)
-plot_energy_levels(subplot, -0.3)
-plot_energy_levels(subplot, -0.2)
+'''fig = plt.figure()
+subplot_energies = fig.add_subplot(121)
+subplot_wavefuncs = fig.add_subplot(122)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.9)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.7)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.5)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.4)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.3)
+plot_energy_levels(subplot_energies, subplot_wavefuncs, -0.1)
 
-fig.show()
+
+fig.show()'''
 
 '''test(-0.9)
 test'(-0.8)

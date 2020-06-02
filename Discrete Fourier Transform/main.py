@@ -133,15 +133,15 @@ def calc_and_plot(x, y, numb_of_signal_pts, spacing_period, title):
 
 
 
-'''#sin(2pi*2x) + sin(2pi*4x)
-N=1000
+#sin(2pi*2x) + sin(2pi*4x)
+'''N=1000
 left_border = -2*np.pi
 right_border = 2*np.pi
 x = np.linspace(left_border, right_border, N)
 y = np.sin(np.multiply(2*np.pi*2, x)) + np.sin(np.multiply(2 * np.pi * 4, x))
-calc_and_plot(x, y, N, get_spacing_period(left_border, right_border, N), 'sin(2pi*2x)+sin(2pi*4x)')
+calc_and_plot(x, y, N, get_spacing_period(left_border, right_border, N), 'sin(2pi*2x)+sin(2pi*4x)')'''
 
-
+'''
 #exp(-x^2/2)
 N = 400
 left_border = -50
@@ -165,7 +165,7 @@ calc_and_plot(x, y, N, get_spacing_period(left_border, right_border, N), 'Dirac 
 
 
 #############
-'''#обратное фурье от сдвига
+#обратное фурье от сдвига
 N=500
 left_border = -2*np.pi
 right_border = 2*np.pi
@@ -213,7 +213,7 @@ subplot.plot(fftshift(xf), abs(fftshift(lib_res_module))/N, 'r--', label = 'Lib 
 subplot.plot(fftshift(xf), abs(fftshift(diff_module))/N, 'g', label = 'difference')
 subplot.legend()
 
-fig.show()'''
+fig.show()
 
 
 
